@@ -333,6 +333,118 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Professional Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px) scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            font-size: 2rem;
+        }
+
+        .modal h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        .modal p {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .instructions {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .instructions h4 {
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .instructions ol {
+            color: #64748b;
+            padding-left: 1rem;
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .modal-close {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
     </style>
 </head>
 
@@ -486,11 +598,34 @@
                 btn.innerHTML = originalText;
                 btn.style.pointerEvents = 'auto';
 
-                // Show professional instructions
+                // Show professional modal
                 setTimeout(() => {
-                    alert('Download Started Successfully!\n\n📋 Installation Instructions:\n\n1. Run the downloaded installer as Administrator\n2. Follow the installation wizard\n3. Connect to internet for first-time device authorization\n4. Contact support at 0989-38-66-62 for device registration\n5. Login with your authorized credentials\n\n✅ Your professional bingo gaming platform is ready!');
+                    showModal();
                 }, 1000);
             }, 2000);
+        });
+
+        // Modal functions
+        function showModal() {
+            document.getElementById('downloadModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('downloadModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('downloadModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
         });
 
         // Smooth scrolling for navigation links
@@ -507,6 +642,32 @@
             });
         });
     </script>
+
+    <!-- Professional Download Success Modal -->
+    <div class="modal-overlay" id="downloadModal">
+        <div class="modal">
+            <div class="modal-icon">✓</div>
+            <h3>Download Started Successfully!</h3>
+            <p>Your KELALBINGO installer is now downloading. Follow the instructions below to complete the installation.
+            </p>
+
+            <div class="instructions">
+                <h4>📋 Installation Instructions</h4>
+                <ol>
+                    <li><strong>Run the installer as Administrator</strong> - Right-click and select "Run as
+                        administrator"</li>
+                    <li><strong>Follow the installation wizard</strong> - Accept the license and choose installation
+                        directory</li>
+                    <li><strong>Connect to internet</strong> - Required for first-time device authorization</li>
+                    <li><strong>Contact support for device registration</strong> - Call 0989-38-66-62</li>
+                    <li><strong>Login with authorized credentials</strong> - Use your registered username and password
+                    </li>
+                </ol>
+            </div>
+
+            <button class="modal-close" onclick="closeModal()">Got It, Thanks!</button>
+        </div>
+    </div>
 </body>
 
 </html>
