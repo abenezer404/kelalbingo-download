@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KELALBINGO - Download</title>
+    <title>KELALBINGO - Professional Bingo Gaming Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,162 +14,454 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #ffffff;
         }
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 600px;
-            width: 90%;
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .logo {
-            font-size: 3em;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
-        .tagline {
-            color: #666;
-            font-size: 1.2em;
-            margin-bottom: 30px;
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
         }
 
-        .version {
-            background: #f0f0f0;
-            padding: 10px 20px;
-            border-radius: 25px;
-            display: inline-block;
-            margin-bottom: 30px;
-            color: #333;
+        .nav-links a {
+            color: white;
+            text-decoration: none;
             font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .hero .subtitle {
+            font-size: 1.25rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .download-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+            margin: 0 auto;
         }
 
         .download-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
             color: white;
-            padding: 15px 40px;
+            padding: 1rem 2rem;
             border: none;
-            border-radius: 50px;
-            font-size: 1.2em;
-            font-weight: bold;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
             text-decoration: none;
-            display: inline-block;
-            transition: transform 0.3s ease;
-            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 1rem;
         }
 
         .download-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
         }
 
         .file-info {
-            color: #888;
-            font-size: 0.9em;
-            margin-bottom: 30px;
+            color: #64748b;
+            font-size: 0.9rem;
+            text-align: center;
         }
 
+        /* Features Section */
         .features {
-            text-align: left;
-            margin-top: 30px;
+            padding: 4rem 0;
+            background: white;
         }
 
-        .features h3 {
-            color: #333;
-            margin-bottom: 15px;
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
         }
 
-        .features ul {
-            list-style: none;
-            padding: 0;
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 3rem;
         }
 
-        .features li {
-            padding: 8px 0;
-            color: #666;
-            position: relative;
-            padding-left: 25px;
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
         }
 
-        .features li:before {
-            content: "✓";
-            color: #667eea;
-            font-weight: bold;
-            position: absolute;
-            left: 0;
+        .feature-card {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
         }
 
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* System Requirements */
+        .requirements {
+            background: #f8fafc;
+            padding: 4rem 0;
+        }
+
+        .requirements-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .req-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .req-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .req-item h4 {
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .req-item p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* Support Section */
         .support {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 30px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
         }
 
-        .support h3 {
-            color: #333;
-            margin-bottom: 10px;
+        .support-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .support h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
         }
 
         .support p {
-            color: #666;
-            margin-bottom: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .contact-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
         }
 
         .phone {
-            color: #667eea;
-            font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .hours {
+            opacity: 0.8;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1e293b;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .req-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="logo">KELALBINGO</div>
-        <div class="tagline">Professional Bingo Gaming Application</div>
-
-        <div class="version">Version 2.0.0</div>
-
-        <a href="#" id="downloadBtn" class="download-btn">
-            📥 Download for Windows
-        </a>
-
-        <div class="file-info">
-            KELALBINGO-Setup-2.0.0.exe • Windows 64-bit • ~150MB
+    <!-- Header -->
+    <header class="header">
+        <div class="nav-container">
+            <div class="logo">KELALBINGO</div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#requirements">Requirements</a></li>
+                    <li><a href="#support">Support</a></li>
+                </ul>
+            </nav>
         </div>
+    </header>
 
-        <div class="features">
-            <h3>What's New in Version 2.0.0</h3>
-            <ul>
-                <li>Enhanced device licensing system</li>
-                <li>Improved offline functionality (30-day grace period)</li>
-                <li>Better login authentication with server sync</li>
-                <li>Multi-device support</li>
-                <li>Secure encrypted database</li>
-                <li>Automatic balance reporting</li>
-            </ul>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <h1>Professional Bingo Gaming Platform</h1>
+            <p class="subtitle">Enterprise-grade bingo management system with advanced features and secure multi-device
+                support</p>
+
+            <div class="version-badge">Latest Version 2.0.0</div>
+
+            <div class="download-section">
+                <a href="#" id="downloadBtn" class="download-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                    </svg>
+                    Download for Windows
+                </a>
+                <div class="file-info">
+                    KELALBINGO-Setup-2.0.0.exe • Windows 64-bit • ~150MB
+                </div>
+            </div>
         </div>
-
-        <div class="support">
-            <h3>Need Help?</h3>
-            <p>For technical support and device authorization:</p>
-            <div class="phone">📞 0989-38-66-62</div>
+    </section>
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="features-container">
+            <h2 class="section-title">Enterprise Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔐</div>
+                    <h3>Advanced Security</h3>
+                    <p>Military-grade encryption with secure device licensing and authentication system protecting your
+                        gaming operations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Multi-Device Support</h3>
+                    <p>Seamless operation across multiple devices with centralized user management and automatic
+                        synchronization.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Real-Time Analytics</h3>
+                    <p>Comprehensive game statistics, balance tracking, and detailed transaction history with automated
+                        reporting.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Offline Capability</h3>
+                    <p>Continue operations even without internet connection with 30-day offline grace period and local
+                        data storage.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>High Performance</h3>
+                    <p>Optimized for speed and reliability with encrypted SQLite database and efficient memory
+                        management.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Professional Gaming</h3>
+                    <p>Complete bingo card management, game history tracking, and customizable gaming configurations.
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
+    <!-- System Requirements -->
+    <section class="requirements" id="requirements">
+        <div class="requirements-container">
+            <h2 class="section-title">System Requirements</h2>
+            <div class="req-grid">
+                <div class="req-item">
+                    <h4>Operating System</h4>
+                    <p>Windows 10 or Windows 11 (64-bit)</p>
+                </div>
+                <div class="req-item">
+                    <h4>Memory</h4>
+                    <p>4 GB RAM minimum, 8 GB recommended</p>
+                </div>
+                <div class="req-item">
+                    <h4>Storage</h4>
+                    <p>500 MB available disk space</p>
+                </div>
+                <div class="req-item">
+                    <h4>Network</h4>
+                    <p>Internet connection required for initial setup</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
+    <!-- Support Section -->
+    <section class="support" id="support">
+        <div class="support-container">
+            <h2>Professional Support</h2>
+            <p>Get expert assistance with installation, device authorization, and technical support from our dedicated
+                team.</p>
+
+            <div class="contact-info">
+                <div class="phone">📞 0989-38-66-62</div>
+                <div class="hours">Available for technical support and device authorization</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2026 KELALBINGO. Professional Bingo Gaming Platform. All rights reserved.</p>
+        </div>
+    </footer>
     <script>
         // Your actual GitHub release download URL
         const DOWNLOAD_URL = 'https://github.com/abenezer404/kelalbingo-admin-system/releases/download/v2.0.0/KELALBINGO-Setup-2.0.0.exe';
@@ -176,16 +469,42 @@
         document.getElementById('downloadBtn').addEventListener('click', function (e) {
             e.preventDefault();
 
-            // Track download (optional)
-            console.log('Download started');
+            // Show loading state
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<div class="loading"></div> Downloading...';
+            btn.style.pointerEvents = 'none';
+
+            // Track download
+            console.log('Download initiated for KELALBINGO v2.0.0');
 
             // Start download
             window.location.href = DOWNLOAD_URL;
 
-            // Show thank you message
+            // Reset button after delay
             setTimeout(() => {
-                alert('Thank you for downloading KELALBINGO!\n\nAfter installation:\n1. Connect to internet for first-time setup\n2. Contact 0989-38-66-62 for device authorization\n3. Use your registered credentials to login');
-            }, 1000);
+                btn.innerHTML = originalText;
+                btn.style.pointerEvents = 'auto';
+
+                // Show professional instructions
+                setTimeout(() => {
+                    alert('Download Started Successfully!\n\n📋 Installation Instructions:\n\n1. Run the downloaded installer as Administrator\n2. Follow the installation wizard\n3. Connect to internet for first-time device authorization\n4. Contact support at 0989-38-66-62 for device registration\n5. Login with your authorized credentials\n\n✅ Your professional bingo gaming platform is ready!');
+                }, 1000);
+            }, 2000);
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
         });
     </script>
 </body>
