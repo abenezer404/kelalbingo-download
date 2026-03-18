@@ -475,12 +475,78 @@
             <div class="version-badge">Latest Version 2.0.0</div>
 
             <div class="download-section">
-                <a href="#" id="downloadBtn" class="download-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
-                    </svg>
-                    Download for Windows
-                </a>
+                <div id="authStep1" class="auth-step">
+                    <h3 style="margin-bottom: 1rem; color: #1e293b;">Download Authorization Required</h3>
+                    <p style="margin-bottom: 1rem; color: #64748b;">Enter your device information to request download
+                        authorization:</p>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; color: #1e293b; font-weight: 500;">Your
+                            Name:</label>
+                        <input type="text" id="userName" placeholder="Enter your full name"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; color: #1e293b; font-weight: 500;">Contact
+                            Email:</label>
+                        <input type="email" id="userEmail" placeholder="Enter your email address"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; color: #1e293b; font-weight: 500;">Purpose:</label>
+                        <select id="downloadPurpose"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
+                            <option value="">Select purpose</option>
+                            <option value="business">Business Use</option>
+                            <option value="testing">Testing/Evaluation</option>
+                            <option value="personal">Personal Use</option>
+                            <option value="development">Development</option>
+                        </select>
+                    </div>
+
+                    <div id="deviceInfo"
+                        style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; color: #64748b;">
+                        <strong>Device Information:</strong><br>
+                        <span id="deviceDetails">Detecting device information...</span>
+                    </div>
+
+                    <button id="requestOtpBtn" class="download-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1M10 17L6 13L7.41 11.59L10 14.18L16.59 7.59L18 9L10 17Z" />
+                        </svg>
+                        Request Download Authorization
+                    </button>
+                </div>
+
+                <div id="authStep2" class="auth-step" style="display: none;">
+                    <h3 style="margin-bottom: 1rem; color: #1e293b;">Enter Authorization Code</h3>
+                    <p style="margin-bottom: 1rem; color: #64748b;">An OTP has been sent to the administrator. Please
+                        enter the code you received:</p>
+
+                    <div style="margin-bottom: 1rem;">
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; color: #1e293b; font-weight: 500;">Authorization
+                            Code:</label>
+                        <input type="text" id="otpCode" placeholder="Enter 6-digit OTP code" maxlength="6"
+                            style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 0.2rem;">
+                    </div>
+
+                    <button id="verifyOtpBtn" class="download-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+                        </svg>
+                        Verify & Download
+                    </button>
+
+                    <button id="backToStep1" style="background: #6c757d; margin-top: 0.5rem;" class="download-btn">
+                        Back to Request
+                    </button>
+                </div>
+
                 <div class="file-info">
                     KELALBINGO-Setup-2.0.0.exe • Windows 64-bit • ~150MB
                 </div>
@@ -580,55 +646,225 @@
         // Your Google Drive direct download URL
         const DOWNLOAD_URL = 'https://drive.google.com/uc?export=download&id=13Sj-lTiwlg4DmbnkvjfZi_SdqwM5lfGe';
 
-        document.getElementById('downloadBtn').addEventListener('click', function (e) {
+        // Your admin email for OTP notifications
+        const ADMIN_EMAIL = 'your-admin-email@gmail.com'; // Replace with your actual email
+
+        let currentDeviceInfo = {};
+        let currentOtpSession = null;
+
+        // Detect device information
+        function detectDeviceInfo() {
+            const deviceInfo = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                screenResolution: `${screen.width}x${screen.height}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                timestamp: new Date().toISOString()
+            };
+
+            // Generate a device fingerprint
+            const fingerprint = btoa(JSON.stringify(deviceInfo)).substring(0, 16);
+            deviceInfo.fingerprint = fingerprint;
+
+            return deviceInfo;
+        }
+
+        // Initialize device detection
+        document.addEventListener('DOMContentLoaded', function () {
+            currentDeviceInfo = detectDeviceInfo();
+            document.getElementById('deviceDetails').innerHTML = `
+                Platform: ${currentDeviceInfo.platform}<br>
+                Browser: ${navigator.userAgent.split(' ')[0]}<br>
+                Device ID: ${currentDeviceInfo.fingerprint}<br>
+                Timezone: ${currentDeviceInfo.timezone}
+            `;
+        });
+
+        // Request OTP
+        document.getElementById('requestOtpBtn').addEventListener('click', async function (e) {
             e.preventDefault();
 
-            // Show loading state
+            const userName = document.getElementById('userName').value.trim();
+            const userEmail = document.getElementById('userEmail').value.trim();
+            const purpose = document.getElementById('downloadPurpose').value;
+
+            // Validation
+            if (!userName || !userEmail || !purpose) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            if (!userEmail.includes('@')) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            // Show loading
             const btn = this;
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="loading"></div> Downloading...';
-            btn.style.pointerEvents = 'none';
+            btn.innerHTML = '<div class="loading"></div> Requesting Authorization...';
+            btn.disabled = true;
 
-            // Track download
-            console.log('Download initiated for KELALBINGO v2.0.0');
+            try {
+                // Generate OTP
+                const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                currentOtpSession = {
+                    otp: otp,
+                    deviceFingerprint: currentDeviceInfo.fingerprint,
+                    userName: userName,
+                    userEmail: userEmail,
+                    purpose: purpose,
+                    timestamp: new Date().toISOString(),
+                    expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
+                };
 
-            // Start download
-            window.location.href = DOWNLOAD_URL;
+                // Send email to admin (using EmailJS or similar service)
+                await sendOtpToAdmin(currentOtpSession);
 
-            // Reset button after delay
-            setTimeout(() => {
+                // Show step 2
+                document.getElementById('authStep1').style.display = 'none';
+                document.getElementById('authStep2').style.display = 'block';
+
+            } catch (error) {
+                alert('Failed to send authorization request. Please try again.');
+                console.error('OTP request error:', error);
+            } finally {
                 btn.innerHTML = originalText;
-                btn.style.pointerEvents = 'auto';
+                btn.disabled = false;
+            }
+        });
 
-                // Show professional modal
+        // Verify OTP and download
+        document.getElementById('verifyOtpBtn').addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const enteredOtp = document.getElementById('otpCode').value.trim();
+
+            if (!enteredOtp) {
+                alert('Please enter the authorization code.');
+                return;
+            }
+
+            if (!currentOtpSession) {
+                alert('No active authorization session. Please request a new code.');
+                return;
+            }
+
+            // Check if OTP expired
+            if (new Date() > new Date(currentOtpSession.expiresAt)) {
+                alert('Authorization code has expired. Please request a new one.');
+                currentOtpSession = null;
+                document.getElementById('authStep2').style.display = 'none';
+                document.getElementById('authStep1').style.display = 'block';
+                return;
+            }
+
+            // Verify OTP
+            if (enteredOtp === currentOtpSession.otp) {
+                // OTP is correct, start download
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<div class="loading"></div> Downloading...';
+                btn.disabled = true;
+
+                // Log successful authorization
+                console.log('Download authorized for:', currentOtpSession.userName);
+
+                // Start download
+                window.location.href = DOWNLOAD_URL;
+
+                // Show success message
                 setTimeout(() => {
-                    showModal();
+                    alert(`Download Started Successfully!
+
+📋 Installation Instructions:
+
+1. Run the downloaded installer as Administrator
+2. Follow the installation wizard
+3. Connect to internet for first-time device authorization
+4. Contact support at 0989-38-66-62 for device registration
+5. Login with your authorized credentials
+
+✅ Your professional bingo gaming platform is ready!`);
+
+                    // Reset form
+                    currentOtpSession = null;
+                    document.getElementById('authStep2').style.display = 'none';
+                    document.getElementById('authStep1').style.display = 'block';
+                    document.getElementById('userName').value = '';
+                    document.getElementById('userEmail').value = '';
+                    document.getElementById('downloadPurpose').value = '';
+                    document.getElementById('otpCode').value = '';
+
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }, 1000);
-            }, 2000);
-        });
 
-        // Modal functions
-        function showModal() {
-            document.getElementById('downloadModal').classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('downloadModal').classList.remove('active');
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('downloadModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeModal();
+            } else {
+                alert('Invalid authorization code. Please check and try again.');
+                document.getElementById('otpCode').value = '';
+                document.getElementById('otpCode').focus();
             }
         });
 
-        // Close modal with Escape key
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
+        // Back to step 1
+        document.getElementById('backToStep1').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('authStep2').style.display = 'none';
+            document.getElementById('authStep1').style.display = 'block';
+            currentOtpSession = null;
         });
+
+        // Send OTP to admin email
+        async function sendOtpToAdmin(session) {
+            // Demo mode - shows OTP directly to admin
+            // In production, replace this with actual email service
+
+            const emailContent = `
+🔐 KELALBINGO Download Authorization Request
+
+Authorization Code: ${session.otp}
+Valid for: 10 minutes
+
+👤 User Details:
+• Name: ${session.userName}
+• Email: ${session.userEmail}  
+• Purpose: ${session.purpose}
+• Request Time: ${new Date(session.timestamp).toLocaleString()}
+
+💻 Device Information:
+• Device ID: ${session.deviceFingerprint}
+• Platform: ${currentDeviceInfo.platform}
+• Browser: ${navigator.userAgent.split(' ')[0]}
+• Timezone: ${currentDeviceInfo.timezone}
+
+📋 Instructions:
+Please provide this OTP to the user: ${session.otp}
+
+This code expires at: ${new Date(session.expiresAt).toLocaleString()}
+            `;
+
+            // Show OTP in console for admin (temporary - replace with actual email service)
+            console.log('=== 📧 ADMIN NOTIFICATION ===');
+            console.log(emailContent);
+            console.log('============================');
+
+            // Show alert with OTP for demo purposes (remove in production)
+            alert(`📧 ADMIN NOTIFICATION (Demo Mode)
+
+OTP Generated: ${session.otp}
+
+User: ${session.userName} (${session.userEmail})
+Purpose: ${session.purpose}
+Device: ${session.deviceFingerprint}
+
+In production, this will be sent to your email.
+For now, use this OTP: ${session.otp}`);
+
+            // Simulate email sending delay
+            return new Promise(resolve => setTimeout(resolve, 1000));
+        }
 
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -643,6 +879,18 @@
                 }
             });
         });
+    </script>
+    anchor.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+    target.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start'
+    });
+    }
+    });
+    });
     </script>
 
     <!-- Professional Download Success Modal -->
