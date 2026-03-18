@@ -654,27 +654,17 @@
 
         // Initialize EmailJS and device detection
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize EmailJS with proper syntax
+            // Initialize EmailJS
             if (typeof emailjs !== 'undefined') {
                 emailjs.init(EMAILJS_CONFIG.publicKey);
-                console.log('📧 EmailJS initialized successfully for:', ADMIN_EMAIL);
-                console.log('🔧 EmailJS Config:', EMAILJS_CONFIG);
-
-                // Test EmailJS configuration
-                console.log('🧪 Testing EmailJS configuration...');
-                console.log('Service ID:', EMAILJS_CONFIG.serviceId);
-                console.log('Template ID:', EMAILJS_CONFIG.templateId);
-                console.log('Public Key:', EMAILJS_CONFIG.publicKey);
-            } else {
-                console.error('❌ EmailJS library not loaded');
             }
 
             currentDeviceInfo = detectDeviceInfo();
             document.getElementById('deviceDetails').innerHTML = `
-                Platform: ${currentDeviceInfo.platform}<br>
-                Browser: ${navigator.userAgent.split(' ')[0]}<br>
-                Device ID: ${currentDeviceInfo.fingerprint}<br>
-                Timezone: ${currentDeviceInfo.timezone}
+                ${currentDeviceInfo.platform}<br>
+                ${navigator.userAgent.split(' ')[0]}<br>
+                ${currentDeviceInfo.fingerprint}<br>
+                ${currentDeviceInfo.timezone}
             `;
         });
 
@@ -820,15 +810,6 @@
                     language: currentDeviceInfo.language
                 };
 
-                console.log('📧 Sending OTP email to admin:', ADMIN_EMAIL);
-                console.log('🔐 Generated OTP:', session.otp);
-                console.log('💻 Device ID:', session.deviceFingerprint);
-                console.log('📋 EmailJS Config Check:');
-                console.log('  - Service ID:', EMAILJS_CONFIG.serviceId);
-                console.log('  - Template ID:', EMAILJS_CONFIG.templateId);
-                console.log('  - Public Key:', EMAILJS_CONFIG.publicKey);
-                console.log('📋 Template params:', templateParams);
-
                 // Send email using EmailJS with correct syntax
                 const response = await emailjs.send(
                     EMAILJS_CONFIG.serviceId,
@@ -836,13 +817,7 @@
                     templateParams
                 );
 
-                console.log('✅ OTP email sent successfully to admin!', response);
-
-                // Show success message instead of alert
-                console.log('📧 Email delivery successful - OTP sent to admin');
-
             } catch (error) {
-                console.error('❌ Email sending failed:', error);
 
                 // Parse error details
                 let errorMessage = 'Unknown error';
