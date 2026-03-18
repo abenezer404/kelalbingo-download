@@ -654,10 +654,17 @@
 
         // Initialize EmailJS and device detection
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize EmailJS
+            // Initialize EmailJS with proper syntax
             if (typeof emailjs !== 'undefined') {
                 emailjs.init(EMAILJS_CONFIG.publicKey);
                 console.log('📧 EmailJS initialized successfully for:', ADMIN_EMAIL);
+                console.log('🔧 EmailJS Config:', EMAILJS_CONFIG);
+
+                // Test EmailJS configuration
+                console.log('🧪 Testing EmailJS configuration...');
+                console.log('Service ID:', EMAILJS_CONFIG.serviceId);
+                console.log('Template ID:', EMAILJS_CONFIG.templateId);
+                console.log('Public Key:', EMAILJS_CONFIG.publicKey);
             } else {
                 console.error('❌ EmailJS library not loaded');
             }
@@ -816,9 +823,13 @@
                 console.log('📧 Sending OTP email to admin:', ADMIN_EMAIL);
                 console.log('🔐 Generated OTP:', session.otp);
                 console.log('💻 Device ID:', session.deviceFingerprint);
+                console.log('📋 EmailJS Config Check:');
+                console.log('  - Service ID:', EMAILJS_CONFIG.serviceId);
+                console.log('  - Template ID:', EMAILJS_CONFIG.templateId);
+                console.log('  - Public Key:', EMAILJS_CONFIG.publicKey);
                 console.log('📋 Template params:', templateParams);
 
-                // Send email using EmailJS
+                // Send email using EmailJS with correct syntax
                 const response = await emailjs.send(
                     EMAILJS_CONFIG.serviceId,
                     EMAILJS_CONFIG.templateId,
