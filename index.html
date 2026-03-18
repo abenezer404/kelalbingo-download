@@ -615,8 +615,25 @@
             <p>&copy; 2026 KELALBINGO. Professional Bingo Gaming Platform. All rights reserved.</p>
         </div>
     </footer>
-    <!-- EmailJS Script -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- EmailJS Script - Self-hosted to avoid tracking prevention -->
+    <script>
+        // EmailJS Library (self-hosted to avoid tracking prevention)
+        !function (e, t) { "object" == typeof exports && "undefined" != typeof module ? module.exports = t() : "function" == typeof define && define.amd ? define(t) : (e = "undefined" != typeof globalThis ? globalThis : e || self).emailjs = t() }(this, (function () { "use strict"; class e { constructor(e) { this.status = e, this.text = "" } static createWithError(t) { const n = new e(0); return n.text = `EmailJS error: ${t}`, n } } class t { constructor(e, t, n) { this.service_id = e, this.template_id = t, this.user_id = n, this.accessToken = "" } } const n = "https://api.emailjs.com"; let s = {}; const i = (e, t = "https://api.emailjs.com") => { s.origin = t, s.userId = e, s.blockHeadless = !1, s.storageProvider = (() => { if ("undefined" != typeof localStorage) return { get: e => Promise.resolve(localStorage.getItem(e)), set: (e, t) => Promise.resolve(localStorage.setItem(e, t)), remove: e => Promise.resolve(localStorage.removeItem(e)) }; return { get: () => Promise.resolve(null), set: () => Promise.resolve(), remove: () => Promise.resolve() } })() }, o = (e, t, n) => { const s = new FormData; for (const i in e) s.append(i, e[i]); return fetch(`${n}/api/v1.0/email/${t}`, { method: "POST", body: s }) }, r = e => e ? `${e}`.replace(/[^a-zA-Z0-9]/g, "") : "", a = async (e, i, a) => { const c = r(e), l = r(i), u = r(a); if (!c || !l || !u) throw "The public key, service ID and template ID are required. Visit https://dashboard.emailjs.com/integration"; const d = await s.storageProvider.get("_ej_block_list"); return d && d.split(",").includes(c) ? Promise.reject("The public key is blocked") : o({ lib_version: "3.11.0", user_id: c, service_id: l, template_id: u, template_params: JSON.stringify({}), accessToken: "" }, `send-form/${c}/${l}/${u}`, n).then((e => { if (200 !== e.status) throw `${e.status}: ${e.statusText}`; return new t(l, u, c) })) }, c = async (e, i, a, c) => { const l = r(e), u = r(i), d = r(a); if (!l || !u || !d) throw "The public key, service ID and template ID are required. Visit https://dashboard.emailjs.com/integration"; const p = await s.storageProvider.get("_ej_block_list"); return p && p.split(",").includes(l) ? Promise.reject("The public key is blocked") : o({ lib_version: "3.11.0", user_id: l, service_id: u, template_id: d, template_params: JSON.stringify(c || {}), accessToken: "" }, `send/${l}/${u}/${d}`, n).then((e => { if (200 !== e.status) throw `${e.status}: ${e.statusText}`; return new t(u, d, l) })) }; return { init: i, send: c, sendForm: a } }));
+
+        // Initialize EmailJS when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initEmailJS);
+        } else {
+            initEmailJS();
+        }
+
+        function initEmailJS() {
+            if (typeof emailjs !== 'undefined' && EMAILJS_CONFIG.publicKey !== 'YOUR_EMAILJS_PUBLIC_KEY') {
+                emailjs.init(EMAILJS_CONFIG.publicKey);
+                console.log('📧 EmailJS initialized (self-hosted) for:', ADMIN_EMAIL);
+            }
+        }
+    </script>
     <script>
         // Your Google Drive direct download URL
         const DOWNLOAD_URL = 'https://drive.google.com/uc?export=download&id=13Sj-lTiwlg4DmbnkvjfZi_SdqwM5lfGe';
@@ -627,7 +644,7 @@
         // EmailJS Configuration - REPLACE WITH YOUR ACTUAL KEYS
         const EMAILJS_CONFIG = {
             publicKey: 'UDHt51-qDu7chu2N3',     // Get from emailjs.com account
-            serviceId: 'service_rhf4x86',      // Gmail service ID from emailjs.com
+            serviceId: 'service_seo6z0j',      // Gmail service ID from emailjs.com
             templateId: 'template_neio1pn'     // Template ID from emailjs.com
         };
 
@@ -654,12 +671,6 @@
 
         // Initialize EmailJS and device detection
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize EmailJS
-            if (typeof emailjs !== 'undefined') {
-                emailjs.init(EMAILJS_CONFIG.publicKey);
-                console.log('📧 EmailJS initialized for:', ADMIN_EMAIL);
-            }
-
             currentDeviceInfo = detectDeviceInfo();
             document.getElementById('deviceDetails').innerHTML = `
                 Platform: ${currentDeviceInfo.platform}<br>
@@ -667,6 +678,8 @@
                 Device ID: ${currentDeviceInfo.fingerprint}<br>
                 Timezone: ${currentDeviceInfo.timezone}
             `;
+
+            // EmailJS will be initialized by the self-hosted script above
         });
 
         // Request OTP
