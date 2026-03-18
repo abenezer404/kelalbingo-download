@@ -615,25 +615,8 @@
             <p>&copy; 2026 KELALBINGO. Professional Bingo Gaming Platform. All rights reserved.</p>
         </div>
     </footer>
-    <!-- EmailJS Script - Self-hosted to avoid tracking prevention -->
-    <script>
-        // EmailJS Library (self-hosted to avoid tracking prevention)
-        !function (e, t) { "object" == typeof exports && "undefined" != typeof module ? module.exports = t() : "function" == typeof define && define.amd ? define(t) : (e = "undefined" != typeof globalThis ? globalThis : e || self).emailjs = t() }(this, (function () { "use strict"; class e { constructor(e) { this.status = e, this.text = "" } static createWithError(t) { const n = new e(0); return n.text = `EmailJS error: ${t}`, n } } class t { constructor(e, t, n) { this.service_id = e, this.template_id = t, this.user_id = n, this.accessToken = "" } } const n = "https://api.emailjs.com"; let s = {}; const i = (e, t = "https://api.emailjs.com") => { s.origin = t, s.userId = e, s.blockHeadless = !1, s.storageProvider = (() => { if ("undefined" != typeof localStorage) return { get: e => Promise.resolve(localStorage.getItem(e)), set: (e, t) => Promise.resolve(localStorage.setItem(e, t)), remove: e => Promise.resolve(localStorage.removeItem(e)) }; return { get: () => Promise.resolve(null), set: () => Promise.resolve(), remove: () => Promise.resolve() } })() }, o = (e, t, n) => { const s = new FormData; for (const i in e) s.append(i, e[i]); return fetch(`${n}/api/v1.0/email/${t}`, { method: "POST", body: s }) }, r = e => e ? `${e}`.replace(/[^a-zA-Z0-9]/g, "") : "", a = async (e, i, a) => { const c = r(e), l = r(i), u = r(a); if (!c || !l || !u) throw "The public key, service ID and template ID are required. Visit https://dashboard.emailjs.com/integration"; const d = await s.storageProvider.get("_ej_block_list"); return d && d.split(",").includes(c) ? Promise.reject("The public key is blocked") : o({ lib_version: "3.11.0", user_id: c, service_id: l, template_id: u, template_params: JSON.stringify({}), accessToken: "" }, `send-form/${c}/${l}/${u}`, n).then((e => { if (200 !== e.status) throw `${e.status}: ${e.statusText}`; return new t(l, u, c) })) }, c = async (e, i, a, c) => { const l = r(e), u = r(i), d = r(a); if (!l || !u || !d) throw "The public key, service ID and template ID are required. Visit https://dashboard.emailjs.com/integration"; const p = await s.storageProvider.get("_ej_block_list"); return p && p.split(",").includes(l) ? Promise.reject("The public key is blocked") : o({ lib_version: "3.11.0", user_id: l, service_id: u, template_id: d, template_params: JSON.stringify(c || {}), accessToken: "" }, `send/${l}/${u}/${d}`, n).then((e => { if (200 !== e.status) throw `${e.status}: ${e.statusText}`; return new t(u, d, l) })) }; return { init: i, send: c, sendForm: a } }));
-
-        // Initialize EmailJS when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initEmailJS);
-        } else {
-            initEmailJS();
-        }
-
-        function initEmailJS() {
-            if (typeof emailjs !== 'undefined' && EMAILJS_CONFIG.publicKey !== 'YOUR_EMAILJS_PUBLIC_KEY') {
-                emailjs.init(EMAILJS_CONFIG.publicKey);
-                console.log('📧 EmailJS initialized (self-hosted) for:', ADMIN_EMAIL);
-            }
-        }
-    </script>
+    <!-- EmailJS Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
         // Your Google Drive direct download URL
         const DOWNLOAD_URL = 'https://drive.google.com/uc?export=download&id=13Sj-lTiwlg4DmbnkvjfZi_SdqwM5lfGe';
@@ -671,6 +654,14 @@
 
         // Initialize EmailJS and device detection
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialize EmailJS
+            if (typeof emailjs !== 'undefined') {
+                emailjs.init(EMAILJS_CONFIG.publicKey);
+                console.log('📧 EmailJS initialized successfully for:', ADMIN_EMAIL);
+            } else {
+                console.error('❌ EmailJS library not loaded');
+            }
+
             currentDeviceInfo = detectDeviceInfo();
             document.getElementById('deviceDetails').innerHTML = `
                 Platform: ${currentDeviceInfo.platform}<br>
@@ -678,8 +669,6 @@
                 Device ID: ${currentDeviceInfo.fingerprint}<br>
                 Timezone: ${currentDeviceInfo.timezone}
             `;
-
-            // EmailJS will be initialized by the self-hosted script above
         });
 
         // Request OTP
@@ -799,6 +788,16 @@
         // Send OTP to admin email
         async function sendOtpToAdmin(session) {
             try {
+                // Check if EmailJS is properly configured
+                if (EMAILJS_CONFIG.publicKey === 'YOUR_EMAILJS_PUBLIC_KEY') {
+                    throw new Error('EmailJS not configured - Please set up your EmailJS keys in the website code');
+                }
+
+                // Check if EmailJS is loaded
+                if (typeof emailjs === 'undefined') {
+                    throw new Error('EmailJS library not loaded - Please check internet connection');
+                }
+
                 // Prepare email template parameters
                 const templateParams = {
                     to_email: ADMIN_EMAIL,
@@ -817,42 +816,63 @@
                 console.log('📧 Sending OTP email to admin:', ADMIN_EMAIL);
                 console.log('🔐 Generated OTP:', session.otp);
                 console.log('💻 Device ID:', session.deviceFingerprint);
-
-                // Check if EmailJS is properly configured
-                if (EMAILJS_CONFIG.publicKey === 'YOUR_EMAILJS_PUBLIC_KEY') {
-                    throw new Error('EmailJS not configured - Please set up your EmailJS keys');
-                }
+                console.log('📋 Template params:', templateParams);
 
                 // Send email using EmailJS
-                if (typeof emailjs !== 'undefined') {
-                    await emailjs.send(
-                        EMAILJS_CONFIG.serviceId,
-                        EMAILJS_CONFIG.templateId,
-                        templateParams
-                    );
-                    console.log('✅ OTP email sent successfully to admin!');
-                } else {
-                    throw new Error('EmailJS library not loaded');
-                }
+                const response = await emailjs.send(
+                    EMAILJS_CONFIG.serviceId,
+                    EMAILJS_CONFIG.templateId,
+                    templateParams
+                );
+
+                console.log('✅ OTP email sent successfully to admin!', response);
+
+                // Show success message instead of alert
+                console.log('📧 Email delivery successful - OTP sent to admin');
 
             } catch (error) {
                 console.error('❌ Email sending failed:', error);
 
-                // Show error with OTP for admin reference
+                // Parse error details
+                let errorMessage = 'Unknown error';
+                let errorDetails = '';
+
+                if (error.text) {
+                    errorMessage = error.text;
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (typeof error === 'string') {
+                    errorMessage = error;
+                }
+
+                // Add specific error details
+                if (errorMessage.includes('412')) {
+                    errorDetails = 'Gmail authentication scope issue. Please reconnect Gmail service in EmailJS.';
+                } else if (errorMessage.includes('400')) {
+                    errorDetails = 'Invalid template parameters. Please check your EmailJS template.';
+                } else if (errorMessage.includes('401')) {
+                    errorDetails = 'Invalid EmailJS credentials. Please check your public key.';
+                } else if (errorMessage.includes('404')) {
+                    errorDetails = 'Service or template not found. Please check your service ID and template ID.';
+                }
+
+                // Show detailed error information
                 alert(`📧 EMAIL SENDING FAILED
 
-⚠️ EmailJS Configuration Required!
+⚠️ Error: ${errorMessage}
+${errorDetails ? '\n💡 Solution: ' + errorDetails : ''}
 
 Generated OTP: ${session.otp}
 Device ID: ${session.deviceFingerprint}
 Request Time: ${new Date(session.timestamp).toLocaleString()}
 
-Please configure EmailJS to send emails to: ${ADMIN_EMAIL}
+📞 Contact admin at: 0989-38-66-62
+📧 Admin email: ${ADMIN_EMAIL}
 
-Error: ${error.message}`);
+🔧 For testing, use this OTP: ${session.otp}`);
 
                 // Still allow the process to continue for testing
-                console.log('🔧 Continuing in demo mode...');
+                console.log('🔧 Continuing in demo mode with OTP:', session.otp);
             }
         }
 
