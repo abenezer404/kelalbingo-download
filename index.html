@@ -642,12 +642,21 @@
             <p>&copy; 2026 KELALBINGO. Professional Bingo Gaming Platform. All rights reserved.</p>
         </div>
     </footer>
+    <!-- EmailJS Script -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
         // Your Google Drive direct download URL
         const DOWNLOAD_URL = 'https://drive.google.com/uc?export=download&id=13Sj-lTiwlg4DmbnkvjfZi_SdqwM5lfGe';
 
         // Your admin email for OTP notifications
-        const ADMIN_EMAIL = 'your-admin-email@gmail.com'; // Replace with your actual email
+        const ADMIN_EMAIL = 'ebenezerandualem953@gmail.com';
+
+        // EmailJS Configuration
+        const EMAILJS_CONFIG = {
+            publicKey: 'qJOuYvqtJhb_kQWBH',     // EmailJS public key
+            serviceId: 'service_kelalbingo',      // EmailJS service ID  
+            templateId: 'template_otp_request'    // EmailJS template ID
+        };
 
         let currentDeviceInfo = {};
         let currentOtpSession = null;
@@ -670,8 +679,14 @@
             return deviceInfo;
         }
 
-        // Initialize device detection
+        // Initialize EmailJS and device detection
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialize EmailJS
+            if (typeof emailjs !== 'undefined') {
+                emailjs.init(EMAILJS_CONFIG.publicKey);
+                console.log('📧 EmailJS initialized for:', ADMIN_EMAIL);
+            }
+
             currentDeviceInfo = detectDeviceInfo();
             document.getElementById('deviceDetails').innerHTML = `
                 Platform: ${currentDeviceInfo.platform}<br>
@@ -818,40 +833,43 @@
 
         // Send OTP to admin email
         async function sendOtpToAdmin(session) {
-            // Demo mode - shows OTP directly to admin
-            // In production, replace this with actual email service
+            try {
+                // Prepare email template parameters
+                const templateParams = {
+                    admin_email: ADMIN_EMAIL,
+                    otp_code: session.otp,
+                    user_name: session.userName,
+                    user_email: session.userEmail,
+                    purpose: session.purpose,
+                    device_id: session.deviceFingerprint,
+                    platform: currentDeviceInfo.platform,
+                    browser: navigator.userAgent.split(' ')[0],
+                    timezone: currentDeviceInfo.timezone,
+                    request_time: new Date(session.timestamp).toLocaleString(),
+                    expires_at: new Date(session.expiresAt).toLocaleString(),
+                    device_details: JSON.stringify(currentDeviceInfo, null, 2)
+                };
 
-            const emailContent = `
-🔐 KELALBINGO Download Authorization Request
+                console.log('📧 Sending OTP email to:', ADMIN_EMAIL);
+                console.log('📋 Email data:', templateParams);
 
-Authorization Code: ${session.otp}
-Valid for: 10 minutes
+                // Send email using EmailJS
+                if (typeof emailjs !== 'undefined') {
+                    await emailjs.send(
+                        EMAILJS_CONFIG.serviceId,
+                        EMAILJS_CONFIG.templateId,
+                        templateParams
+                    );
+                    console.log('✅ OTP email sent successfully!');
+                } else {
+                    throw new Error('EmailJS not loaded');
+                }
 
-👤 User Details:
-• Name: ${session.userName}
-• Email: ${session.userEmail}  
-• Purpose: ${session.purpose}
-• Request Time: ${new Date(session.timestamp).toLocaleString()}
+            } catch (error) {
+                console.error('❌ Email sending failed:', error);
 
-💻 Device Information:
-• Device ID: ${session.deviceFingerprint}
-• Platform: ${currentDeviceInfo.platform}
-• Browser: ${navigator.userAgent.split(' ')[0]}
-• Timezone: ${currentDeviceInfo.timezone}
-
-📋 Instructions:
-Please provide this OTP to the user: ${session.otp}
-
-This code expires at: ${new Date(session.expiresAt).toLocaleString()}
-            `;
-
-            // Show OTP in console for admin (temporary - replace with actual email service)
-            console.log('=== 📧 ADMIN NOTIFICATION ===');
-            console.log(emailContent);
-            console.log('============================');
-
-            // Show alert with OTP for demo purposes (remove in production)
-            alert(`📧 ADMIN NOTIFICATION (Demo Mode)
+                // Fallback: Show OTP in alert for demo
+                alert(`📧 EMAIL SENDING FAILED - DEMO MODE
 
 OTP Generated: ${session.otp}
 
@@ -859,11 +877,10 @@ User: ${session.userName} (${session.userEmail})
 Purpose: ${session.purpose}
 Device: ${session.deviceFingerprint}
 
-In production, this will be sent to your email.
-For now, use this OTP: ${session.otp}`);
+Please set up EmailJS properly or use this OTP: ${session.otp}
 
-            // Simulate email sending delay
-            return new Promise(resolve => setTimeout(resolve, 1000));
+Error: ${error.message}`);
+            }
         }
 
         // Smooth scrolling for navigation links
