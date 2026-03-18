@@ -477,35 +477,8 @@
             <div class="download-section">
                 <div id="authStep1" class="auth-step">
                     <h3 style="margin-bottom: 1rem; color: #1e293b;">Download Authorization Required</h3>
-                    <p style="margin-bottom: 1rem; color: #64748b;">Enter your device information to request download
-                        authorization:</p>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: #1e293b; font-weight: 500;">Your
-                            Name:</label>
-                        <input type="text" id="userName" placeholder="Enter your full name"
-                            style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
-                    </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label style="display: block; margin-bottom: 0.5rem; color: #1e293b; font-weight: 500;">Contact
-                            Email:</label>
-                        <input type="email" id="userEmail" placeholder="Enter your email address"
-                            style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
-                    </div>
-
-                    <div style="margin-bottom: 1rem;">
-                        <label
-                            style="display: block; margin-bottom: 0.5rem; color: #1e293b; font-weight: 500;">Purpose:</label>
-                        <select id="downloadPurpose"
-                            style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem;">
-                            <option value="">Select purpose</option>
-                            <option value="business">Business Use</option>
-                            <option value="testing">Testing/Evaluation</option>
-                            <option value="personal">Personal Use</option>
-                            <option value="development">Development</option>
-                        </select>
-                    </div>
+                    <p style="margin-bottom: 1rem; color: #64748b;">Click below to request download authorization. An
+                        OTP will be sent to the administrator.</p>
 
                     <div id="deviceInfo"
                         style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; color: #64748b;">
@@ -525,7 +498,7 @@
                 <div id="authStep2" class="auth-step" style="display: none;">
                     <h3 style="margin-bottom: 1rem; color: #1e293b;">Enter Authorization Code</h3>
                     <p style="margin-bottom: 1rem; color: #64748b;">An OTP has been sent to the administrator. Please
-                        enter the code you received:</p>
+                        contact the admin at <strong>0989-38-66-62</strong> to get your authorization code:</p>
 
                     <div style="margin-bottom: 1rem;">
                         <label
@@ -651,11 +624,11 @@
         // Your admin email for OTP notifications
         const ADMIN_EMAIL = 'ebenezerandualem953@gmail.com';
 
-        // EmailJS Configuration
+        // EmailJS Configuration - REPLACE WITH YOUR ACTUAL KEYS
         const EMAILJS_CONFIG = {
-            publicKey: 'qJOuYvqtJhb_kQWBH',     // EmailJS public key
-            serviceId: 'service_kelalbingo',      // EmailJS service ID  
-            templateId: 'template_otp_request'    // EmailJS template ID
+            publicKey: 'UDHt51-qDu7chu2N3',     // Get from emailjs.com account
+            serviceId: 'service_rhf4x86',      // Gmail service ID from emailjs.com
+            templateId: 'template_neio1pn'     // Template ID from emailjs.com
         };
 
         let currentDeviceInfo = {};
@@ -700,21 +673,6 @@
         document.getElementById('requestOtpBtn').addEventListener('click', async function (e) {
             e.preventDefault();
 
-            const userName = document.getElementById('userName').value.trim();
-            const userEmail = document.getElementById('userEmail').value.trim();
-            const purpose = document.getElementById('downloadPurpose').value;
-
-            // Validation
-            if (!userName || !userEmail || !purpose) {
-                alert('Please fill in all required fields.');
-                return;
-            }
-
-            if (!userEmail.includes('@')) {
-                alert('Please enter a valid email address.');
-                return;
-            }
-
             // Show loading
             const btn = this;
             const originalText = btn.innerHTML;
@@ -727,14 +685,11 @@
                 currentOtpSession = {
                     otp: otp,
                     deviceFingerprint: currentDeviceInfo.fingerprint,
-                    userName: userName,
-                    userEmail: userEmail,
-                    purpose: purpose,
                     timestamp: new Date().toISOString(),
                     expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
                 };
 
-                // Send email to admin (using EmailJS or similar service)
+                // Send email to admin
                 await sendOtpToAdmin(currentOtpSession);
 
                 // Show step 2
@@ -807,9 +762,6 @@
                     currentOtpSession = null;
                     document.getElementById('authStep2').style.display = 'none';
                     document.getElementById('authStep1').style.display = 'block';
-                    document.getElementById('userName').value = '';
-                    document.getElementById('userEmail').value = '';
-                    document.getElementById('downloadPurpose').value = '';
                     document.getElementById('otpCode').value = '';
 
                     btn.innerHTML = originalText;
@@ -836,22 +788,27 @@
             try {
                 // Prepare email template parameters
                 const templateParams = {
-                    admin_email: ADMIN_EMAIL,
+                    to_email: ADMIN_EMAIL,
                     otp_code: session.otp,
-                    user_name: session.userName,
-                    user_email: session.userEmail,
-                    purpose: session.purpose,
                     device_id: session.deviceFingerprint,
                     platform: currentDeviceInfo.platform,
                     browser: navigator.userAgent.split(' ')[0],
                     timezone: currentDeviceInfo.timezone,
                     request_time: new Date(session.timestamp).toLocaleString(),
                     expires_at: new Date(session.expiresAt).toLocaleString(),
-                    device_details: JSON.stringify(currentDeviceInfo, null, 2)
+                    user_agent: currentDeviceInfo.userAgent,
+                    screen_resolution: currentDeviceInfo.screenResolution,
+                    language: currentDeviceInfo.language
                 };
 
-                console.log('📧 Sending OTP email to:', ADMIN_EMAIL);
-                console.log('📋 Email data:', templateParams);
+                console.log('📧 Sending OTP email to admin:', ADMIN_EMAIL);
+                console.log('🔐 Generated OTP:', session.otp);
+                console.log('💻 Device ID:', session.deviceFingerprint);
+
+                // Check if EmailJS is properly configured
+                if (EMAILJS_CONFIG.publicKey === 'YOUR_EMAILJS_PUBLIC_KEY') {
+                    throw new Error('EmailJS not configured - Please set up your EmailJS keys');
+                }
 
                 // Send email using EmailJS
                 if (typeof emailjs !== 'undefined') {
@@ -860,26 +817,29 @@
                         EMAILJS_CONFIG.templateId,
                         templateParams
                     );
-                    console.log('✅ OTP email sent successfully!');
+                    console.log('✅ OTP email sent successfully to admin!');
                 } else {
-                    throw new Error('EmailJS not loaded');
+                    throw new Error('EmailJS library not loaded');
                 }
 
             } catch (error) {
                 console.error('❌ Email sending failed:', error);
 
-                // Fallback: Show OTP in alert for demo
-                alert(`📧 EMAIL SENDING FAILED - DEMO MODE
+                // Show error with OTP for admin reference
+                alert(`📧 EMAIL SENDING FAILED
 
-OTP Generated: ${session.otp}
+⚠️ EmailJS Configuration Required!
 
-User: ${session.userName} (${session.userEmail})
-Purpose: ${session.purpose}
-Device: ${session.deviceFingerprint}
+Generated OTP: ${session.otp}
+Device ID: ${session.deviceFingerprint}
+Request Time: ${new Date(session.timestamp).toLocaleString()}
 
-Please set up EmailJS properly or use this OTP: ${session.otp}
+Please configure EmailJS to send emails to: ${ADMIN_EMAIL}
 
 Error: ${error.message}`);
+
+                // Still allow the process to continue for testing
+                console.log('🔧 Continuing in demo mode...');
             }
         }
 
