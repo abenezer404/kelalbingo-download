@@ -669,6 +669,135 @@
                 text-align: center;
             }
         }
+
+        /* Version OTP Modal Styles */
+        .version-otp-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .version-otp-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.4s ease-out;
+        }
+
+        .version-otp-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .version-otp-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .version-otp-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .version-otp-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .version-otp-body {
+            padding: 2rem;
+        }
+
+        .version-info-display {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .version-info-display h4 {
+            color: #1e293b;
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+        }
+
+        .version-info-display p {
+            color: #64748b;
+            margin: 0.25rem 0;
+            font-size: 0.95rem;
+        }
+
+        .version-otp-step p {
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .version-otp-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            margin-right: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .version-otp-btn.primary {
+            background: linear-gradient(135deg, #1e3a8a, #3730a3);
+            color: white;
+            width: 100%;
+            margin-right: 0;
+        }
+
+        .version-otp-btn.primary:hover {
+            background: linear-gradient(135deg, #1e40af, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+        }
+
+        .version-otp-btn.secondary {
+            background: #6c757d;
+            color: white;
+            width: 100%;
+            margin-right: 0;
+        }
+
+        .version-otp-btn.secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .version-otp-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
     </style>
 </head>
 
@@ -702,12 +831,6 @@
                     <h3 style="margin-bottom: 1rem; color: #1e293b;">Download Authorization Required</h3>
                     <p style="margin-bottom: 1rem; color: #64748b;">Click below to request download authorization. An
                         OTP will be sent to the administrator.</p>
-
-                    <div id="deviceInfo"
-                        style="background: #f8fafc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; color: #64748b;">
-                        <strong>Device Information:</strong><br>
-                        <span id="deviceDetails">Detecting device information...</span>
-                    </div>
 
                     <button id="requestOtpBtn" class="download-btn">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -963,12 +1086,6 @@
             }
 
             currentDeviceInfo = detectDeviceInfo();
-            document.getElementById('deviceDetails').innerHTML = `
-                ${currentDeviceInfo.platform}<br>
-                ${navigator.userAgent.split(' ')[0]}<br>
-                ${currentDeviceInfo.fingerprint}<br>
-                ${currentDeviceInfo.timezone}
-            `;
         });
 
         // Request OTP
@@ -1166,6 +1283,7 @@ Request Time: ${new Date(session.timestamp).toLocaleString()}
         }
 
         // Version-specific download function
+        // Version-specific download function with OTP authentication
         function downloadVersion(version, fileId) {
             // Version-specific download URLs
             const versionDownloads = {
@@ -1187,37 +1305,145 @@ Request Time: ${new Date(session.timestamp).toLocaleString()}
                 return;
             }
 
-            // Show confirmation dialog
-            const confirmDownload = confirm(`Download KELALBINGO ${version}?
+            // Store the requested version for after OTP verification
+            sessionStorage.setItem('requestedVersion', version);
+            sessionStorage.setItem('requestedFileId', versionInfo.fileId);
+            sessionStorage.setItem('requestedFileName', versionInfo.fileName);
 
-📦 File: ${versionInfo.fileName}
-📏 Size: ${versionInfo.size}
+            // Show OTP authentication modal
+            showVersionOtpModal(version, versionInfo);
+        }
 
-⚠️ Note: This will download an older version. 
-For the latest features and security updates, we recommend downloading v2.1.0.
+        // Show OTP modal for version downloads
+        function showVersionOtpModal(version, versionInfo) {
+            // Create modal HTML
+            const modalHtml = `
+                <div id="versionOtpModal" class="version-otp-modal">
+                    <div class="version-otp-content">
+                        <div class="version-otp-header">
+                            <h3>Download Authorization Required</h3>
+                            <button class="version-otp-close" onclick="closeVersionOtpModal()">✕</button>
+                        </div>
+                        <div class="version-otp-body">
+                            <div class="version-info-display">
+                                <h4>Requesting: KELALBINGO ${version}</h4>
+                                <p>File: ${versionInfo.fileName}</p>
+                                <p>Size: ${versionInfo.size}</p>
+                            </div>
+                            
+                            <div id="versionOtpStep1" class="version-otp-step">
+                                <p>Click below to request download authorization. An OTP will be sent to the administrator.</p>
+                                <button id="requestVersionOtpBtn" class="version-otp-btn primary">
+                                    🔐 Request Authorization
+                                </button>
+                            </div>
 
-Click OK to proceed with download.`);
+                            <div id="versionOtpStep2" class="version-otp-step" style="display: none;">
+                                <p>An OTP has been sent to the administrator. Please contact the admin at <strong>0989-38-66-62</strong> to get your authorization code:</p>
+                                <div style="margin: 1rem 0;">
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Authorization Code:</label>
+                                    <input type="text" id="versionOtpCode" placeholder="Enter 6-digit OTP code" maxlength="6"
+                                        style="width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1.2rem; text-align: center; letter-spacing: 0.2rem;">
+                                </div>
+                                <button id="verifyVersionOtpBtn" class="version-otp-btn primary">
+                                    📥 Verify & Download
+                                </button>
+                                <button id="backToVersionStep1" class="version-otp-btn secondary">
+                                    ← Back
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-            if (!confirmDownload) {
-                return;
-            }
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-            // Generate download URL
-            const downloadUrl = `https://drive.google.com/uc?export=download&id=${versionInfo.fileId}`;
+            // Show modal
+            document.getElementById('versionOtpModal').style.display = 'flex';
 
-            // Start download
-            try {
-                // Create temporary link and trigger download
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.download = versionInfo.fileName;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+            // Add event listeners
+            setupVersionOtpListeners();
+        }
 
-                // Show success message
-                setTimeout(() => {
-                    alert(`✅ Download Started: KELALBINGO ${version}
+        // Setup event listeners for version OTP modal
+        function setupVersionOtpListeners() {
+            // Request OTP button
+            document.getElementById('requestVersionOtpBtn').addEventListener('click', async function () {
+                const btn = this;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '⏳ Requesting...';
+                btn.disabled = true;
+
+                try {
+                    // Generate OTP
+                    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                    const version = sessionStorage.getItem('requestedVersion');
+                    const fileName = sessionStorage.getItem('requestedFileName');
+
+                    currentOtpSession = {
+                        otp: otp,
+                        deviceFingerprint: currentDeviceInfo.fingerprint,
+                        timestamp: new Date().toISOString(),
+                        expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutes
+                        requestedVersion: version,
+                        requestedFile: fileName
+                    };
+
+                    // Send email to admin
+                    await sendVersionOtpToAdmin(currentOtpSession);
+
+                    // Show step 2
+                    document.getElementById('versionOtpStep1').style.display = 'none';
+                    document.getElementById('versionOtpStep2').style.display = 'block';
+
+                } catch (error) {
+                    alert('Failed to send authorization request. Please try again.');
+                    console.error('Version OTP request error:', error);
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            });
+
+            // Verify OTP button
+            document.getElementById('verifyVersionOtpBtn').addEventListener('click', function () {
+                const enteredOtp = document.getElementById('versionOtpCode').value.trim();
+
+                if (!enteredOtp) {
+                    alert('Please enter the authorization code.');
+                    return;
+                }
+
+                if (!currentOtpSession) {
+                    alert('No active authorization session. Please request a new code.');
+                    return;
+                }
+
+                // Check if OTP expired
+                if (new Date() > new Date(currentOtpSession.expiresAt)) {
+                    alert('Authorization code has expired. Please request a new one.');
+                    currentOtpSession = null;
+                    document.getElementById('versionOtpStep2').style.display = 'none';
+                    document.getElementById('versionOtpStep1').style.display = 'block';
+                    return;
+                }
+
+                // Verify OTP
+                if (enteredOtp === currentOtpSession.otp) {
+                    // OTP is correct, start download
+                    const version = sessionStorage.getItem('requestedVersion');
+                    const fileId = sessionStorage.getItem('requestedFileId');
+                    const fileName = sessionStorage.getItem('requestedFileName');
+
+                    // Start download
+                    const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+                    window.location.href = downloadUrl;
+
+                    // Show success message
+                    setTimeout(() => {
+                        alert(`✅ Download Started: KELALBINGO ${version}
 
 📋 Installation Instructions:
 
@@ -1227,23 +1453,120 @@ Click OK to proceed with download.`);
 4. 📞 Contact support at 0989-38-66-62 for assistance
 5. 🔑 Login with your authorized credentials
 
-${version === '2.1.0' ? '🚀 You\'re downloading the latest version with all new features!' : '⚠️ You\'re downloading an older version. Consider upgrading to v2.1.0 for the latest features.'}
-
 💾 Your existing data will be preserved during installation.`);
-                }, 500);
+
+                        // Clean up
+                        closeVersionOtpModal();
+                        sessionStorage.removeItem('requestedVersion');
+                        sessionStorage.removeItem('requestedFileId');
+                        sessionStorage.removeItem('requestedFileName');
+                        currentOtpSession = null;
+                    }, 1000);
+
+                } else {
+                    alert('Invalid authorization code. Please check and try again.');
+                    document.getElementById('versionOtpCode').value = '';
+                    document.getElementById('versionOtpCode').focus();
+                }
+            });
+
+            // Back button
+            document.getElementById('backToVersionStep1').addEventListener('click', function () {
+                document.getElementById('versionOtpStep2').style.display = 'none';
+                document.getElementById('versionOtpStep1').style.display = 'block';
+                currentOtpSession = null;
+            });
+        }
+
+        // Send OTP to admin for version downloads
+        async function sendVersionOtpToAdmin(session) {
+            try {
+                // Check if EmailJS is properly configured
+                if (EMAILJS_CONFIG.publicKey === 'YOUR_EMAILJS_PUBLIC_KEY') {
+                    throw new Error('EmailJS not configured - Please set up your EmailJS keys in the website code');
+                }
+
+                // Check if EmailJS is loaded
+                if (typeof emailjs === 'undefined') {
+                    throw new Error('EmailJS library not loaded - Please check internet connection');
+                }
+
+                // Prepare email template parameters
+                const templateParams = {
+                    to_email: ADMIN_EMAIL,
+                    otp_code: session.otp,
+                    device_id: session.deviceFingerprint,
+                    platform: currentDeviceInfo.platform,
+                    browser: navigator.userAgent.split(' ')[0],
+                    timezone: currentDeviceInfo.timezone,
+                    request_time: new Date(session.timestamp).toLocaleString(),
+                    expires_at: new Date(session.expiresAt).toLocaleString(),
+                    user_agent: currentDeviceInfo.userAgent,
+                    screen_resolution: currentDeviceInfo.screenResolution,
+                    language: currentDeviceInfo.language,
+                    requested_version: session.requestedVersion,
+                    requested_file: session.requestedFile
+                };
+
+                // Send email using EmailJS
+                const response = await emailjs.send(
+                    EMAILJS_CONFIG.serviceId,
+                    EMAILJS_CONFIG.templateId,
+                    templateParams
+                );
 
             } catch (error) {
-                console.error('Download error:', error);
-                alert(`❌ Download Failed
+                // Parse error details
+                let errorMessage = 'Unknown error';
+                let errorDetails = '';
 
-There was an issue starting the download. Please try:
+                if (error.text) {
+                    errorMessage = error.text;
+                } else if (error.message) {
+                    errorMessage = error.message;
+                } else if (typeof error === 'string') {
+                    errorMessage = error;
+                }
 
-1. 🔄 Refresh the page and try again
-2. 🌐 Check your internet connection
-3. 📞 Contact support at 0989-38-66-62
+                // Add specific error details
+                if (errorMessage.includes('412')) {
+                    errorDetails = 'Gmail authentication scope issue. Please reconnect Gmail service in EmailJS.';
+                } else if (errorMessage.includes('400')) {
+                    errorDetails = 'Invalid template parameters. Please check your EmailJS template.';
+                } else if (errorMessage.includes('401')) {
+                    errorDetails = 'Invalid EmailJS credentials. Please check your public key.';
+                } else if (errorMessage.includes('404')) {
+                    errorDetails = 'Service or template not found. Please check your service ID and template ID.';
+                }
 
-Error details: ${error.message || 'Unknown error'}`);
+                // Show detailed error information
+                alert(`📧 EMAIL SENDING FAILED
+
+⚠️ Error: ${errorMessage}
+${errorDetails ? '\n💡 Solution: ' + errorDetails : ''}
+
+Generated OTP: ${session.otp}
+Device ID: ${session.deviceFingerprint}
+Requested: ${session.requestedVersion}
+Request Time: ${new Date(session.timestamp).toLocaleString()}
+
+📞 Contact admin at: 0989-38-66-62
+📧 Admin email: ${ADMIN_EMAIL}
+
+🔧 For testing, use this OTP: ${session.otp}`);
+
+                // Still allow the process to continue for testing
+                console.log('🔧 Continuing in demo mode with OTP:', session.otp);
             }
+        }
+
+        // Close version OTP modal
+        function closeVersionOtpModal() {
+            const modal = document.getElementById('versionOtpModal');
+            if (modal) {
+                modal.remove();
+            }
+            currentOtpSession = null;
         }
 
         // Close modal function
