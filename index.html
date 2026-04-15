@@ -695,7 +695,7 @@
             <p class="subtitle">Enterprise-grade bingo management system with advanced features and secure multi-device
                 support</p>
 
-            <div class="version-badge">Latest Version 2.0.0</div>
+            <div class="version-badge">Latest Version 2.1.0</div>
 
             <div class="download-section">
                 <div id="authStep1" class="auth-step">
@@ -744,7 +744,7 @@
                 </div>
 
                 <div class="file-info">
-                    KELALBINGO-Setup-2.0.0.exe • Windows 64-bit • ~150MB
+                    KELALBINGO-Setup-2.1.0.exe • Windows 64-bit • ~158MB
                 </div>
             </div>
         </div>
@@ -829,14 +829,44 @@
                 <div class="version-card latest">
                     <div class="version-header">
                         <div class="version-info">
-                            <h3>v2.0.0</h3>
+                            <h3>v2.1.0</h3>
                             <span class="version-badge latest-badge">Latest</span>
                         </div>
                         <div class="version-date">April 15, 2026</div>
                     </div>
                     <div class="version-content">
                         <div class="release-notes">
-                            <h4>🚀 What's New:</h4>
+                            <h4>🎨 What's New:</h4>
+                            <ul>
+                                <li>🎨 Modern Update UI - No more ugly modals!</li>
+                                <li>🔧 Enhanced Network Error Handling with retry options</li>
+                                <li>⚡ Performance improvements - 66% faster game start</li>
+                                <li>🔒 Improved security and connection handling</li>
+                                <li>🎯 Professional button-based update system</li>
+                            </ul>
+                        </div>
+                        <div class="version-actions">
+                            <button class="download-version-btn primary"
+                                onclick="downloadVersion('2.1.0', 'NEW_FILE_ID_FOR_V2_1_0')">
+                                📥 Download v2.1.0
+                            </button>
+                            <div class="version-size">~158 MB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previous Version -->
+                <div class="version-card">
+                    <div class="version-header">
+                        <div class="version-info">
+                            <h3>v2.0.0</h3>
+                            <span class="version-badge stable-badge">Stable</span>
+                        </div>
+                        <div class="version-date">April 15, 2026</div>
+                    </div>
+                    <div class="version-content">
+                        <div class="release-notes">
+                            <h4>🚀 Previous Release:</h4>
                             <ul>
                                 <li>⚡ Performance improvements - 66% faster game start</li>
                                 <li>🔧 Fixed database transaction handling</li>
@@ -846,7 +876,7 @@
                             </ul>
                         </div>
                         <div class="version-actions">
-                            <button class="download-version-btn primary"
+                            <button class="download-version-btn secondary"
                                 onclick="downloadVersion('2.0.0', '1VBAEJGYjtSMB9RfciLxuM7cGrtsV6LjY')">
                                 📥 Download v2.0.0
                             </button>
@@ -854,8 +884,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Previous Versions -->
                 <div class="version-card">
                     <div class="version-header">
                         <div class="version-info">
@@ -1224,6 +1252,11 @@ Request Time: ${new Date(session.timestamp).toLocaleString()}
         function downloadVersion(version, fileId) {
             // Version-specific download URLs
             const versionDownloads = {
+                '2.1.0': {
+                    fileId: 'NEW_FILE_ID_FOR_V2_1_0', // Replace with actual Google Drive file ID
+                    fileName: 'KELALBINGO-Setup-2.1.0.exe',
+                    size: '~158 MB'
+                },
                 '2.0.0': {
                     fileId: '1VBAEJGYjtSMB9RfciLxuM7cGrtsV6LjY',
                     fileName: 'KELALBINGO-Setup-2.0.0.exe',
@@ -1259,7 +1292,7 @@ Request Time: ${new Date(session.timestamp).toLocaleString()}
 📏 Size: ${versionInfo.size}
 
 ⚠️ Note: This will download an older version. 
-For the latest features and security updates, we recommend downloading v2.0.0.
+For the latest features and security updates, we recommend downloading v2.1.0.
 
 Click OK to proceed with download.`);
 
@@ -1292,7 +1325,7 @@ Click OK to proceed with download.`);
 4. 📞 Contact support at 0989-38-66-62 for assistance
 5. 🔑 Login with your authorized credentials
 
-${version === '2.0.0' ? '🚀 You\'re downloading the latest version with all new features!' : '⚠️ You\'re downloading an older version. Consider upgrading to v2.0.0 for the latest features.'}
+${version === '2.1.0' ? '🚀 You\'re downloading the latest version with all new features!' : '⚠️ You\'re downloading an older version. Consider upgrading to v2.1.0 for the latest features.'}
 
 💾 Your existing data will be preserved during installation.`);
                 }, 500);
