@@ -1012,6 +1012,10 @@
     <!-- EmailJS Script -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
+        // Global variables for security system
+        let currentDeviceInfo = null;
+        let currentOtpSession = null;
+
         // Your admin email for OTP notifications
         const ADMIN_EMAIL = 'ebenezerandualem953@gmail.com';
 
@@ -1169,12 +1173,95 @@
             return (array[0] % 900000 + 100000).toString();
         }
 
+        // Enhanced device information display
+        function formatDeviceInfoForDisplay(deviceInfo) {
+            // Parse browser info from user agent
+            const userAgent = deviceInfo.userAgent;
+            let browserName = 'Unknown Browser';
+            let browserVersion = '';
+
+            if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+                const chromeMatch = userAgent.match(/Chrome\/([0-9.]+)/);
+                browserName = 'Google Chrome';
+                browserVersion = chromeMatch ? chromeMatch[1] : '';
+            } else if (userAgent.includes('Firefox')) {
+                const firefoxMatch = userAgent.match(/Firefox\/([0-9.]+)/);
+                browserName = 'Mozilla Firefox';
+                browserVersion = firefoxMatch ? firefoxMatch[1] : '';
+            } else if (userAgent.includes('Edg')) {
+                const edgeMatch = userAgent.match(/Edg\/([0-9.]+)/);
+                browserName = 'Microsoft Edge';
+                browserVersion = edgeMatch ? edgeMatch[1] : '';
+            } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+                const safariMatch = userAgent.match(/Version\/([0-9.]+)/);
+                browserName = 'Safari';
+                browserVersion = safariMatch ? safariMatch[1] : '';
+            }
+
+            // Parse OS info
+            let osName = deviceInfo.platform;
+            if (userAgent.includes('Windows NT 10.0')) {
+                osName = 'Windows 10/11';
+            } else if (userAgent.includes('Windows NT 6.3')) {
+                osName = 'Windows 8.1';
+            } else if (userAgent.includes('Windows NT 6.1')) {
+                osName = 'Windows 7';
+            } else if (userAgent.includes('Mac OS X')) {
+                const macMatch = userAgent.match(/Mac OS X ([0-9_]+)/);
+                osName = macMatch ? `macOS ${macMatch[1].replace(/_/g, '.')}` : 'macOS';
+            } else if (userAgent.includes('Linux')) {
+                osName = 'Linux';
+            }
+
+            return {
+                deviceId: deviceInfo.fingerprint,
+                os: osName,
+                browser: `${browserName} ${browserVersion}`.trim(),
+                screen: deviceInfo.screenResolution,
+                timezone: deviceInfo.timezone,
+                language: deviceInfo.language,
+                timestamp: new Date(deviceInfo.timestamp).toLocaleString()
+            };
+        }
+
+        // Update email template to include formatted device info
+        function prepareEmailTemplateParams(session) {
+            const formattedInfo = formatDeviceInfoForDisplay(currentDeviceInfo);
+
+            return {
+                to_email: ADMIN_EMAIL,
+                otp_code: session.otp,
+                device_id: formattedInfo.deviceId,
+
+                // Enhanced device information
+                operating_system: formattedInfo.os,
+                browser_info: formattedInfo.browser,
+                screen_resolution: formattedInfo.screen,
+                timezone: formattedInfo.timezone,
+                language: formattedInfo.language,
+                request_timestamp: formattedInfo.timestamp,
+
+                // Request details
+                requested_version: session.requestedVersion,
+                requested_file: session.requestedFile,
+                security_level: session.securityLevel || 'NORMAL',
+                request_count: session.requestCount || 1,
+
+                // Expiration info
+                expires_at: new Date(session.expiresAt).toLocaleString(),
+
+                // Raw data for technical analysis
+                raw_user_agent: currentDeviceInfo.userAgent,
+                raw_platform: currentDeviceInfo.platform
+            };
+        }
+
         // Security event logging
         function logSecurityEvent(event, details = {}) {
             const securityLog = {
                 timestamp: new Date().toISOString(),
                 event: event,
-                deviceFingerprint: currentDeviceInfo.fingerprint,
+                deviceFingerprint: currentDeviceInfo?.fingerprint || 'unknown',
                 userAgent: navigator.userAgent,
                 details: details
             };
@@ -1197,19 +1284,477 @@
             }
         }
 
-        // Detect device information with enhanced security
+        // Enhanced device information collection with accuracy validation
         function detectDeviceInfo() {
+            // Get comprehensive device information
             const deviceInfo = {
+                // Basic browser info
                 userAgent: navigator.userAgent,
                 platform: navigator.platform,
                 language: navigator.language,
+                languages: navigator.languages || [],
+
+                // Screen and display
                 screenResolution: `${screen.width}x${screen.height}`,
+                screenColorDepth: screen.colorDepth,
+                screenPixelDepth: screen.pixelDepth,
+                devicePixelRatio: window.devicePixelRatio,
+
+                // System capabilities
+                hardwareConcurrency: navigator.hardwareConcurrency || 'Unknown',
+                maxTouchPoints: navigator.maxTouchPoints || 0,
+                cookieEnabled: navigator.cookieEnabled,
+                onLine: navigator.onLine,
+
+                // Time and location
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                timezoneOffset: new Date().getTimezoneOffset(),
                 timestamp: new Date().toISOString(),
-                fingerprint: generateEnhancedFingerprint()
+
+                // Browser features
+                webGL: getWebGLInfo(),
+                canvas: getCanvasFingerprint(),
+
+                // Memory and performance (if available)
+                deviceMemory: navigator.deviceMemory || 'Unknown',
+                connection: getConnectionInfo(),
+
+                // Detailed OS detection
+                detailedOS: getDetailedOSInfo(),
+
+                // Real browser detection
+                realBrowser: getRealBrowserInfo()
             };
 
+            // Generate enhanced fingerprint
+            deviceInfo.fingerprint = generateEnhancedFingerprint();
+
             return deviceInfo;
+        }
+
+        // Get detailed OS information
+        function getDetailedOSInfo() {
+            const userAgent = navigator.userAgent;
+            const platform = navigator.platform;
+
+            let osInfo = {
+                name: 'Unknown',
+                version: 'Unknown',
+                architecture: 'Unknown'
+            };
+
+            // Windows detection
+            if (userAgent.includes('Windows NT')) {
+                osInfo.name = 'Windows';
+                if (userAgent.includes('Windows NT 10.0')) {
+                    // Check if it's Windows 11 (build number check)
+                    if (userAgent.includes('Windows NT 10.0; Win64; x64')) {
+                        osInfo.version = 'Windows 10/11';
+                        osInfo.architecture = '64-bit';
+                    } else {
+                        osInfo.version = 'Windows 10';
+                        osInfo.architecture = platform.includes('64') ? '64-bit' : '32-bit';
+                    }
+                } else if (userAgent.includes('Windows NT 6.3')) {
+                    osInfo.version = 'Windows 8.1';
+                } else if (userAgent.includes('Windows NT 6.1')) {
+                    osInfo.version = 'Windows 7';
+                }
+            }
+            // macOS detection
+            else if (userAgent.includes('Mac OS X')) {
+                osInfo.name = 'macOS';
+                const macMatch = userAgent.match(/Mac OS X ([0-9_]+)/);
+                if (macMatch) {
+                    osInfo.version = macMatch[1].replace(/_/g, '.');
+                }
+                osInfo.architecture = userAgent.includes('Intel') ? 'Intel' : 'Apple Silicon';
+            }
+            // Linux detection
+            else if (userAgent.includes('Linux')) {
+                osInfo.name = 'Linux';
+                osInfo.architecture = userAgent.includes('x86_64') ? '64-bit' : '32-bit';
+            }
+
+            return osInfo;
+        }
+
+        // Get real browser information
+        function getRealBrowserInfo() {
+            const userAgent = navigator.userAgent;
+
+            let browserInfo = {
+                name: 'Unknown Browser',
+                version: 'Unknown',
+                engine: 'Unknown'
+            };
+
+            // Chrome detection (must be before Safari check)
+            if (userAgent.includes('Chrome') && !userAgent.includes('Edg') && !userAgent.includes('OPR')) {
+                browserInfo.name = 'Google Chrome';
+                const chromeMatch = userAgent.match(/Chrome\/([0-9.]+)/);
+                browserInfo.version = chromeMatch ? chromeMatch[1] : 'Unknown';
+                browserInfo.engine = 'Blink';
+            }
+            // Edge detection
+            else if (userAgent.includes('Edg')) {
+                browserInfo.name = 'Microsoft Edge';
+                const edgeMatch = userAgent.match(/Edg\/([0-9.]+)/);
+                browserInfo.version = edgeMatch ? edgeMatch[1] : 'Unknown';
+                browserInfo.engine = 'Blink';
+            }
+            // Firefox detection
+            else if (userAgent.includes('Firefox')) {
+                browserInfo.name = 'Mozilla Firefox';
+                const firefoxMatch = userAgent.match(/Firefox\/([0-9.]+)/);
+                browserInfo.version = firefoxMatch ? firefoxMatch[1] : 'Unknown';
+                browserInfo.engine = 'Gecko';
+            }
+            // Safari detection
+            else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+                browserInfo.name = 'Safari';
+                const safariMatch = userAgent.match(/Version\/([0-9.]+)/);
+                browserInfo.version = safariMatch ? safariMatch[1] : 'Unknown';
+                browserInfo.engine = 'WebKit';
+            }
+            // Opera detection
+            else if (userAgent.includes('OPR')) {
+                browserInfo.name = 'Opera';
+                const operaMatch = userAgent.match(/OPR\/([0-9.]+)/);
+                browserInfo.version = operaMatch ? operaMatch[1] : 'Unknown';
+                browserInfo.engine = 'Blink';
+            }
+
+            return browserInfo;
+        }
+
+        // Get WebGL information for fingerprinting
+        function getWebGLInfo() {
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+                if (!gl) return { supported: false };
+
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+
+                return {
+                    supported: true,
+                    vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'Unknown',
+                    renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Unknown',
+                    version: gl.getParameter(gl.VERSION),
+                    shadingLanguageVersion: gl.getParameter(gl.SHADING_LANGUAGE_VERSION)
+                };
+            } catch (e) {
+                return { supported: false, error: e.message };
+            }
+        }
+
+        // Get canvas fingerprint
+        function getCanvasFingerprint() {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('KELALBINGO Security Check 🔒', 2, 15);
+                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+                ctx.fillText('Device Fingerprint Test', 4, 45);
+
+                return canvas.toDataURL();
+            } catch (e) {
+                return 'Canvas not supported';
+            }
+        }
+
+        // Get connection information
+        function getConnectionInfo() {
+            if ('connection' in navigator) {
+                const conn = navigator.connection;
+                return {
+                    effectiveType: conn.effectiveType || 'Unknown',
+                    downlink: conn.downlink || 'Unknown',
+                    rtt: conn.rtt || 'Unknown'
+                };
+            }
+            return { supported: false };
+        }
+
+        // Device information accuracy validation
+        function validateDeviceInfoAccuracy() {
+            const deviceInfo = currentDeviceInfo;
+            const validationResults = {
+                overall: 'PASS',
+                issues: [],
+                warnings: [],
+                recommendations: []
+            };
+
+            console.log('🔍 Device Information Validation Report');
+            console.log('=====================================');
+
+            // 1. Validate OS Detection Accuracy
+            const osValidation = validateOSDetection(deviceInfo);
+            if (!osValidation.accurate) {
+                validationResults.issues.push(`OS Detection: ${osValidation.issue}`);
+                validationResults.overall = 'FAIL';
+            }
+            console.log(`✅ OS Detection: ${deviceInfo.detailedOS.name} ${deviceInfo.detailedOS.version} (${deviceInfo.detailedOS.architecture})`);
+
+            // 2. Validate Browser Detection Accuracy
+            const browserValidation = validateBrowserDetection(deviceInfo);
+            if (!browserValidation.accurate) {
+                validationResults.issues.push(`Browser Detection: ${browserValidation.issue}`);
+                validationResults.overall = 'FAIL';
+            }
+            console.log(`✅ Browser Detection: ${deviceInfo.realBrowser.name} ${deviceInfo.realBrowser.version} (${deviceInfo.realBrowser.engine})`);
+
+            // 3. Validate Hardware Information
+            const hardwareValidation = validateHardwareInfo(deviceInfo);
+            if (hardwareValidation.warnings.length > 0) {
+                validationResults.warnings.push(...hardwareValidation.warnings);
+            }
+            console.log(`✅ Hardware Info: ${deviceInfo.hardwareConcurrency} cores, ${deviceInfo.deviceMemory || 'Unknown'} GB RAM`);
+
+            // 4. Validate Screen Information
+            const screenValidation = validateScreenInfo(deviceInfo);
+            console.log(`✅ Screen Info: ${deviceInfo.screenResolution}, ${deviceInfo.screenColorDepth}-bit color`);
+
+            // 5. Validate WebGL Capabilities
+            const webglValidation = validateWebGLInfo(deviceInfo);
+            if (deviceInfo.webGL.supported) {
+                console.log(`✅ WebGL: ${deviceInfo.webGL.vendor} - ${deviceInfo.webGL.renderer}`);
+            } else {
+                console.log(`⚠️ WebGL: Not supported or blocked`);
+                validationResults.warnings.push('WebGL not available - reduced fingerprint accuracy');
+            }
+
+            // 6. Validate Timezone and Language
+            console.log(`✅ Locale: ${deviceInfo.timezone}, Language: ${deviceInfo.language}`);
+
+            // 7. Check for potential spoofing
+            const spoofingCheck = detectPotentialSpoofing(deviceInfo);
+            if (spoofingCheck.suspicious) {
+                validationResults.warnings.push(`Potential spoofing detected: ${spoofingCheck.reason}`);
+            }
+
+            // 8. Validate fingerprint uniqueness
+            const fingerprintValidation = validateFingerprintUniqueness(deviceInfo);
+            console.log(`✅ Fingerprint: ${deviceInfo.fingerprint} (${fingerprintValidation.uniqueness})`);
+
+            // Generate final report
+            console.log('=====================================');
+            console.log(`🎯 Overall Validation: ${validationResults.overall}`);
+
+            if (validationResults.issues.length > 0) {
+                console.log('❌ Critical Issues:');
+                validationResults.issues.forEach(issue => console.log(`   - ${issue}`));
+            }
+
+            if (validationResults.warnings.length > 0) {
+                console.log('⚠️ Warnings:');
+                validationResults.warnings.forEach(warning => console.log(`   - ${warning}`));
+            }
+
+            // Store validation results
+            localStorage.setItem('kelalbingo_device_validation', JSON.stringify({
+                timestamp: new Date().toISOString(),
+                results: validationResults,
+                deviceInfo: {
+                    os: `${deviceInfo.detailedOS.name} ${deviceInfo.detailedOS.version}`,
+                    browser: `${deviceInfo.realBrowser.name} ${deviceInfo.realBrowser.version}`,
+                    fingerprint: deviceInfo.fingerprint
+                }
+            }));
+
+            return validationResults;
+        }
+
+        // Validate OS detection accuracy
+        function validateOSDetection(deviceInfo) {
+            const userAgent = deviceInfo.userAgent;
+            const platform = deviceInfo.platform;
+            const detectedOS = deviceInfo.detailedOS;
+
+            // Cross-reference platform with user agent
+            if (platform.includes('Win') && !userAgent.includes('Windows')) {
+                return { accurate: false, issue: 'Platform indicates Windows but UserAgent doesn\'t match' };
+            }
+
+            if (platform.includes('Mac') && !userAgent.includes('Mac OS')) {
+                return { accurate: false, issue: 'Platform indicates Mac but UserAgent doesn\'t match' };
+            }
+
+            if (platform.includes('Linux') && !userAgent.includes('Linux')) {
+                return { accurate: false, issue: 'Platform indicates Linux but UserAgent doesn\'t match' };
+            }
+
+            // Check for generic/default values
+            if (detectedOS.name === 'Unknown' || detectedOS.version === 'Unknown') {
+                return { accurate: false, issue: 'OS detection returned generic values' };
+            }
+
+            return { accurate: true };
+        }
+
+        // Validate browser detection accuracy
+        function validateBrowserDetection(deviceInfo) {
+            const userAgent = deviceInfo.userAgent;
+            const detectedBrowser = deviceInfo.realBrowser;
+
+            // Check for generic/default values
+            if (detectedBrowser.name === 'Unknown Browser' || detectedBrowser.version === 'Unknown') {
+                return { accurate: false, issue: 'Browser detection returned generic values' };
+            }
+
+            // Validate Chrome detection
+            if (detectedBrowser.name === 'Google Chrome') {
+                if (!userAgent.includes('Chrome') || userAgent.includes('Edg') || userAgent.includes('OPR')) {
+                    return { accurate: false, issue: 'Chrome detected but UserAgent suggests different browser' };
+                }
+            }
+
+            // Validate Firefox detection
+            if (detectedBrowser.name === 'Mozilla Firefox') {
+                if (!userAgent.includes('Firefox')) {
+                    return { accurate: false, issue: 'Firefox detected but UserAgent doesn\'t contain Firefox' };
+                }
+            }
+
+            // Validate Edge detection
+            if (detectedBrowser.name === 'Microsoft Edge') {
+                if (!userAgent.includes('Edg')) {
+                    return { accurate: false, issue: 'Edge detected but UserAgent doesn\'t contain Edg' };
+                }
+            }
+
+            return { accurate: true };
+        }
+
+        // Validate hardware information
+        function validateHardwareInfo(deviceInfo) {
+            const warnings = [];
+
+            // Check for missing hardware info
+            if (!deviceInfo.hardwareConcurrency || deviceInfo.hardwareConcurrency === 'Unknown') {
+                warnings.push('Hardware concurrency not available');
+            }
+
+            if (!deviceInfo.deviceMemory || deviceInfo.deviceMemory === 'Unknown') {
+                warnings.push('Device memory information not available');
+            }
+
+            // Validate reasonable values
+            if (deviceInfo.hardwareConcurrency && (deviceInfo.hardwareConcurrency < 1 || deviceInfo.hardwareConcurrency > 128)) {
+                warnings.push('Hardware concurrency value seems unrealistic');
+            }
+
+            return { warnings };
+        }
+
+        // Validate screen information
+        function validateScreenInfo(deviceInfo) {
+            const resolution = deviceInfo.screenResolution;
+            const [width, height] = resolution.split('x').map(Number);
+
+            const warnings = [];
+
+            // Check for reasonable screen dimensions
+            if (width < 800 || height < 600) {
+                warnings.push('Screen resolution seems unusually small');
+            }
+
+            if (width > 7680 || height > 4320) {
+                warnings.push('Screen resolution seems unusually large');
+            }
+
+            // Check color depth
+            if (deviceInfo.screenColorDepth < 16) {
+                warnings.push('Color depth seems unusually low');
+            }
+
+            return { warnings };
+        }
+
+        // Validate WebGL information
+        function validateWebGLInfo(deviceInfo) {
+            const webgl = deviceInfo.webGL;
+
+            if (!webgl.supported) {
+                return { supported: false, reason: 'WebGL not supported or disabled' };
+            }
+
+            // Check for generic values that might indicate blocking/spoofing
+            if (webgl.vendor === 'Unknown' || webgl.renderer === 'Unknown') {
+                return { supported: true, warning: 'WebGL vendor/renderer information not available' };
+            }
+
+            return { supported: true, accurate: true };
+        }
+
+        // Detect potential spoofing attempts
+        function detectPotentialSpoofing(deviceInfo) {
+            const suspicious = [];
+
+            // Check for inconsistencies between different detection methods
+            const userAgent = deviceInfo.userAgent;
+            const platform = deviceInfo.platform;
+
+            // Platform vs UserAgent inconsistencies
+            if (platform.includes('Win') && userAgent.includes('Mac')) {
+                suspicious.push('Platform/UserAgent OS mismatch');
+            }
+
+            // Check for automation indicators
+            if (navigator.webdriver) {
+                suspicious.push('WebDriver detected (automation)');
+            }
+
+            // Check for headless browser indicators
+            if (!window.chrome && userAgent.includes('Chrome')) {
+                suspicious.push('Possible headless Chrome');
+            }
+
+            // Check for unusual navigator properties
+            if (navigator.plugins.length === 0 && !userAgent.includes('Mobile')) {
+                suspicious.push('No plugins detected (unusual for desktop)');
+            }
+
+            return {
+                suspicious: suspicious.length > 0,
+                reason: suspicious.join(', '),
+                indicators: suspicious
+            };
+        }
+
+        // Validate fingerprint uniqueness
+        function validateFingerprintUniqueness(deviceInfo) {
+            const fingerprint = deviceInfo.fingerprint;
+
+            // Check fingerprint length and format
+            if (!fingerprint || fingerprint.length < 16) {
+                return { uniqueness: 'LOW', reason: 'Fingerprint too short' };
+            }
+
+            // Check for repeated patterns (indicates low entropy)
+            const repeatedPattern = /(.{4,})\1{2,}/.test(fingerprint);
+            if (repeatedPattern) {
+                return { uniqueness: 'LOW', reason: 'Repeated patterns detected' };
+            }
+
+            // Check character diversity
+            const uniqueChars = new Set(fingerprint).size;
+            const diversity = uniqueChars / fingerprint.length;
+
+            if (diversity < 0.3) {
+                return { uniqueness: 'MEDIUM', reason: 'Low character diversity' };
+            }
+
+            return { uniqueness: 'HIGH', reason: 'Good entropy and uniqueness' };
         }
 
         // Initialize security system
@@ -1225,11 +1770,31 @@
             // Generate device info with enhanced fingerprinting
             currentDeviceInfo = detectDeviceInfo();
 
-            // Log initialization
+            // Validate device information accuracy
+            const validationResults = validateDeviceInfoAccuracy();
+
+            // Log initialization with validation results
             logSecurityEvent('system_initialized', {
                 fingerprint: currentDeviceInfo.fingerprint,
-                securityState: securityState
+                securityState: securityState,
+                validation: validationResults.overall,
+                issues: validationResults.issues.length,
+                warnings: validationResults.warnings.length
             });
+
+            // Show validation summary in console for debugging
+            console.log('🔧 Device Information System Ready');
+            console.log(`📊 Validation Status: ${validationResults.overall}`);
+            console.log(`🆔 Device Fingerprint: ${currentDeviceInfo.fingerprint}`);
+            console.log(`💻 Detected System: ${currentDeviceInfo.detailedOS.name} ${currentDeviceInfo.detailedOS.version}`);
+            console.log(`🌐 Detected Browser: ${currentDeviceInfo.realBrowser.name} ${currentDeviceInfo.realBrowser.version}`);
+
+            // Make validation function available globally for debugging
+            window.validateDeviceInfoAccuracy = validateDeviceInfoAccuracy;
+            window.currentDeviceInfo = currentDeviceInfo;
+
+            console.log('🔍 Debug: Type "validateDeviceInfoAccuracy()" in console to run validation again');
+            console.log('🔍 Debug: Type "currentDeviceInfo" in console to see all detected information');
         });
 
         // Version-specific download function with OTP authentication
@@ -1468,22 +2033,8 @@
                     throw new Error('EmailJS library not loaded - Please check internet connection');
                 }
 
-                // Prepare email template parameters
-                const templateParams = {
-                    to_email: ADMIN_EMAIL,
-                    otp_code: session.otp,
-                    device_id: session.deviceFingerprint,
-                    platform: currentDeviceInfo.platform,
-                    browser: navigator.userAgent.split(' ')[0],
-                    timezone: currentDeviceInfo.timezone,
-                    request_time: new Date(session.timestamp).toLocaleString(),
-                    expires_at: new Date(session.expiresAt).toLocaleString(),
-                    user_agent: currentDeviceInfo.userAgent,
-                    screen_resolution: currentDeviceInfo.screenResolution,
-                    language: currentDeviceInfo.language,
-                    requested_version: session.requestedVersion,
-                    requested_file: session.requestedFile
-                };
+                // Prepare email template parameters with enhanced formatting
+                const templateParams = prepareEmailTemplateParams(session);
 
                 // Send email using EmailJS
                 const response = await emailjs.send(
@@ -1594,6 +2145,8 @@ ${backupSolution}
 
         // Enhanced backup contact system
         function showBackupContactOptions(session) {
+            const formattedInfo = formatDeviceInfoForDisplay(currentDeviceInfo);
+
             const backupModal = `
                 <div id="backupContactModal" class="version-otp-modal">
                     <div class="version-otp-content">
@@ -1615,7 +2168,8 @@ ${backupSolution}
                                     <p style="margin: 0; color: #075985;">Call admin at <strong>0989-38-66-62</strong></p>
                                     <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #0369a1;">
                                         Say: "Download request for ${session.requestedVersion}"<br>
-                                        Device ID: ${session.deviceFingerprint}
+                                        Device: ${formattedInfo.os} - ${formattedInfo.browser}<br>
+                                        Device ID: ${formattedInfo.deviceId.substring(0, 12)}...
                                     </p>
                                 </div>
 
@@ -1632,7 +2186,8 @@ ${backupSolution}
                                     <p style="margin: 0; color: #7c2d92;">Email: ${ADMIN_EMAIL}</p>
                                     <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #86198f;">
                                         Subject: "Download Authorization Request"<br>
-                                        Include Device ID: ${session.deviceFingerprint}
+                                        Include: ${formattedInfo.os} - ${formattedInfo.browser}<br>
+                                        Device ID: ${formattedInfo.deviceId.substring(0, 16)}...
                                     </p>
                                 </div>
                             </div>
