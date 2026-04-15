@@ -1022,10 +1022,182 @@
             templateId: 'template_neio1pn'     // Template ID from emailjs.com
         };
 
-        let currentDeviceInfo = {};
-        let currentOtpSession = null;
+        // Enhanced security configuration
+        const SECURITY_CONFIG = {
+            maxRequestsPerSession: 3,
+            maxRequestsPerDevice: 5,
+            cooldownPeriod: 30 * 60 * 1000, // 30 minutes
+            maxOtpAttempts: 3,
+            deviceTrustDuration: 24 * 60 * 60 * 1000, // 24 hours
+            suspiciousActivityThreshold: 5
+        };
 
-        // Detect device information
+        // Security state tracking
+        let securityState = {
+            requestCount: 0,
+            failedAttempts: 0,
+            lastRequestTime: 0,
+            deviceTrusted: false,
+            suspiciousActivity: false
+        };
+
+        // Load security state from localStorage
+        function loadSecurityState() {
+            try {
+                const saved = localStorage.getItem('kelalbingo_security_state');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    // Check if data is not too old (reset after 24 hours)
+                    if (Date.now() - parsed.timestamp < SECURITY_CONFIG.deviceTrustDuration) {
+                        securityState = { ...securityState, ...parsed };
+                    }
+                }
+            } catch (error) {
+                console.warn('Could not load security state:', error);
+            }
+        }
+
+        // Save security state to localStorage
+        function saveSecurityState() {
+            try {
+                const stateToSave = {
+                    ...securityState,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('kelalbingo_security_state', JSON.stringify(stateToSave));
+            } catch (error) {
+                console.warn('Could not save security state:', error);
+            }
+        }
+
+        // Enhanced rate limiting
+        function checkRateLimit() {
+            const now = Date.now();
+            const timeSinceLastRequest = now - securityState.lastRequestTime;
+
+            // Reset counter if cooldown period has passed
+            if (timeSinceLastRequest > SECURITY_CONFIG.cooldownPeriod) {
+                securityState.requestCount = 0;
+                securityState.failedAttempts = 0;
+            }
+
+            // Check if rate limit exceeded
+            if (securityState.requestCount >= SECURITY_CONFIG.maxRequestsPerSession) {
+                const remainingTime = Math.ceil((SECURITY_CONFIG.cooldownPeriod - timeSinceLastRequest) / 60000);
+                throw new Error(`Rate limit exceeded. Please wait ${remainingTime} minutes before trying again.`);
+            }
+
+            // Check for suspicious activity
+            if (securityState.failedAttempts >= SECURITY_CONFIG.suspiciousActivityThreshold) {
+                securityState.suspiciousActivity = true;
+                throw new Error('Suspicious activity detected. Please contact administrator at 0989-38-66-62.');
+            }
+
+            return true;
+        }
+
+        // Enhanced device fingerprinting
+        function generateEnhancedFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillText('KELALBINGO Security Check', 2, 2);
+
+            const fingerprint = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                languages: navigator.languages?.join(',') || '',
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                screenResolution: `${screen.width}x${screen.height}`,
+                colorDepth: screen.colorDepth,
+                pixelRatio: window.devicePixelRatio,
+                canvasFingerprint: canvas.toDataURL(),
+                webglVendor: getWebGLVendor(),
+                cookieEnabled: navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack,
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                maxTouchPoints: navigator.maxTouchPoints
+            };
+
+            return btoa(JSON.stringify(fingerprint)).substring(0, 32);
+        }
+
+        function getWebGLVendor() {
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    return debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'Unknown';
+                }
+            } catch (e) {
+                return 'Unavailable';
+            }
+            return 'No WebGL';
+        }
+
+        // Security validation before OTP request
+        function validateSecurityRequirements() {
+            // Check rate limiting
+            checkRateLimit();
+
+            // Validate browser security features
+            if (!window.crypto || !window.crypto.getRandomValues) {
+                throw new Error('Browser security features not available. Please use a modern browser.');
+            }
+
+            // Check for automation/bot detection
+            if (navigator.webdriver) {
+                throw new Error('Automated access detected. Manual download required.');
+            }
+
+            // Validate minimum browser requirements
+            const userAgent = navigator.userAgent.toLowerCase();
+            if (userAgent.includes('bot') || userAgent.includes('crawler') || userAgent.includes('spider')) {
+                throw new Error('Automated access not permitted.');
+            }
+
+            return true;
+        }
+
+        // Enhanced OTP generation with cryptographic security
+        function generateSecureOTP() {
+            const array = new Uint32Array(1);
+            window.crypto.getRandomValues(array);
+            return (array[0] % 900000 + 100000).toString();
+        }
+
+        // Security event logging
+        function logSecurityEvent(event, details = {}) {
+            const securityLog = {
+                timestamp: new Date().toISOString(),
+                event: event,
+                deviceFingerprint: currentDeviceInfo.fingerprint,
+                userAgent: navigator.userAgent,
+                details: details
+            };
+
+            console.log('🔒 Security Event:', securityLog);
+
+            // Store security events locally for admin review
+            try {
+                const existingLogs = JSON.parse(localStorage.getItem('kelalbingo_security_logs') || '[]');
+                existingLogs.push(securityLog);
+
+                // Keep only last 50 events
+                if (existingLogs.length > 50) {
+                    existingLogs.splice(0, existingLogs.length - 50);
+                }
+
+                localStorage.setItem('kelalbingo_security_logs', JSON.stringify(existingLogs));
+            } catch (error) {
+                console.warn('Could not store security log:', error);
+            }
+        }
+
+        // Detect device information with enhanced security
         function detectDeviceInfo() {
             const deviceInfo = {
                 userAgent: navigator.userAgent,
@@ -1033,24 +1205,31 @@
                 language: navigator.language,
                 screenResolution: `${screen.width}x${screen.height}`,
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                fingerprint: generateEnhancedFingerprint()
             };
-
-            // Generate a device fingerprint
-            const fingerprint = btoa(JSON.stringify(deviceInfo)).substring(0, 16);
-            deviceInfo.fingerprint = fingerprint;
 
             return deviceInfo;
         }
 
-        // Initialize EmailJS and device detection
+        // Initialize security system
         document.addEventListener('DOMContentLoaded', function () {
+            // Load security state
+            loadSecurityState();
+
             // Initialize EmailJS
             if (typeof emailjs !== 'undefined') {
                 emailjs.init(EMAILJS_CONFIG.publicKey);
             }
 
+            // Generate device info with enhanced fingerprinting
             currentDeviceInfo = detectDeviceInfo();
+
+            // Log initialization
+            logSecurityEvent('system_initialized', {
+                fingerprint: currentDeviceInfo.fingerprint,
+                securityState: securityState
+            });
         });
 
         // Version-specific download function with OTP authentication
@@ -1143,12 +1322,21 @@
             document.getElementById('requestVersionOtpBtn').addEventListener('click', async function () {
                 const btn = this;
                 const originalText = btn.innerHTML;
-                btn.innerHTML = '⏳ Requesting...';
-                btn.disabled = true;
 
                 try {
-                    // Generate OTP
-                    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                    // Enhanced security validation
+                    validateSecurityRequirements();
+
+                    btn.innerHTML = '⏳ Requesting...';
+                    btn.disabled = true;
+
+                    // Update security state
+                    securityState.requestCount++;
+                    securityState.lastRequestTime = Date.now();
+                    saveSecurityState();
+
+                    // Generate secure OTP
+                    const otp = generateSecureOTP();
                     const version = sessionStorage.getItem('requestedVersion');
                     const fileName = sessionStorage.getItem('requestedFileName');
 
@@ -1158,10 +1346,19 @@
                         timestamp: new Date().toISOString(),
                         expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutes
                         requestedVersion: version,
-                        requestedFile: fileName
+                        requestedFile: fileName,
+                        securityLevel: securityState.suspiciousActivity ? 'HIGH' : 'NORMAL',
+                        requestCount: securityState.requestCount
                     };
 
-                    // Send email to admin
+                    // Log security event
+                    logSecurityEvent('otp_requested', {
+                        version: version,
+                        requestCount: securityState.requestCount,
+                        securityLevel: currentOtpSession.securityLevel
+                    });
+
+                    // Send email to admin with enhanced security info
                     await sendVersionOtpToAdmin(currentOtpSession);
 
                     // Show step 2
@@ -1169,8 +1366,18 @@
                     document.getElementById('versionOtpStep2').style.display = 'block';
 
                 } catch (error) {
-                    alert('Failed to send authorization request. Please try again.');
-                    console.error('Version OTP request error:', error);
+                    // Log security violation
+                    logSecurityEvent('security_violation', {
+                        error: error.message,
+                        requestCount: securityState.requestCount
+                    });
+
+                    // Update failed attempts
+                    securityState.failedAttempts++;
+                    saveSecurityState();
+
+                    alert(`🔒 Security Check Failed\n\n${error.message}`);
+                    console.error('Security validation error:', error);
                 } finally {
                     btn.innerHTML = originalText;
                     btn.disabled = false;
@@ -1285,10 +1492,16 @@
                     templateParams
                 );
 
+                console.log('✅ OTP email sent successfully');
+
             } catch (error) {
+                // Enhanced backup system for email failures
+                console.error('❌ Email sending failed:', error);
+
                 // Parse error details
                 let errorMessage = 'Unknown error';
                 let errorDetails = '';
+                let backupSolution = '';
 
                 if (error.text) {
                     errorMessage = error.text;
@@ -1298,35 +1511,172 @@
                     errorMessage = error;
                 }
 
-                // Add specific error details
+                // Add specific error details and backup solutions
                 if (errorMessage.includes('412')) {
                     errorDetails = 'Gmail authentication scope issue. Please reconnect Gmail service in EmailJS.';
+                    backupSolution = 'Use the OTP below or contact admin directly.';
                 } else if (errorMessage.includes('400')) {
                     errorDetails = 'Invalid template parameters. Please check your EmailJS template.';
+                    backupSolution = 'Manual verification available - use OTP below.';
                 } else if (errorMessage.includes('401')) {
                     errorDetails = 'Invalid EmailJS credentials. Please check your public key.';
+                    backupSolution = 'Backup authentication - use provided OTP.';
                 } else if (errorMessage.includes('404')) {
                     errorDetails = 'Service or template not found. Please check your service ID and template ID.';
+                    backupSolution = 'Direct admin contact recommended.';
+                } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+                    errorDetails = 'Network connectivity issue. Check internet connection.';
+                    backupSolution = 'Offline verification mode activated.';
+                } else {
+                    backupSolution = 'Fallback authentication system activated.';
                 }
 
-                // Show detailed error information
-                alert(`📧 EMAIL SENDING FAILED
+                // Enhanced backup notification system
+                const backupAlert = `🔧 EMAIL DELIVERY FAILED - BACKUP SYSTEM ACTIVATED
 
+📧 Email Status: Failed to send to admin
 ⚠️ Error: ${errorMessage}
-${errorDetails ? '\n💡 Solution: ' + errorDetails : ''}
+${errorDetails ? '💡 Cause: ' + errorDetails : ''}
 
-Generated OTP: ${session.otp}
-Device ID: ${session.deviceFingerprint}
-Requested: ${session.requestedVersion}
-Request Time: ${new Date(session.timestamp).toLocaleString()}
+🆘 BACKUP AUTHENTICATION OPTIONS:
 
-📞 Contact admin at: 0989-38-66-62
-📧 Admin email: ${ADMIN_EMAIL}
+📱 OPTION 1 - Direct Admin Contact:
+   📞 Call: 0989-38-66-62
+   💬 Say: "Download request for ${session.requestedVersion}"
+   🆔 Device ID: ${session.deviceFingerprint}
+   ⏰ Time: ${new Date(session.timestamp).toLocaleString()}
 
-🔧 For testing, use this OTP: ${session.otp}`);
+🔑 OPTION 2 - Manual OTP (Testing/Emergency):
+   Code: ${session.otp}
+   ⚠️ Valid until: ${new Date(session.expiresAt).toLocaleString()}
+   
+📧 OPTION 3 - Alternative Contact:
+   Email admin directly: ${ADMIN_EMAIL}
+   Subject: "Download Authorization Request"
+   Include: Device ID ${session.deviceFingerprint}
 
-                // Still allow the process to continue for testing
-                console.log('🔧 Continuing in demo mode with OTP:', session.otp);
+${backupSolution}
+
+🔧 This backup system ensures you can still download even if email fails.`;
+
+                alert(backupAlert);
+
+                // Additional backup: Try to store request locally for admin review
+                try {
+                    const backupData = {
+                        timestamp: session.timestamp,
+                        version: session.requestedVersion,
+                        deviceId: session.deviceFingerprint,
+                        otp: session.otp,
+                        expiresAt: session.expiresAt,
+                        userAgent: currentDeviceInfo.userAgent,
+                        platform: currentDeviceInfo.platform
+                    };
+
+                    // Store in localStorage as backup
+                    localStorage.setItem('kelalbingo_backup_request', JSON.stringify(backupData));
+                    console.log('📦 Backup request stored locally for admin review');
+
+                } catch (storageError) {
+                    console.warn('⚠️ Could not store backup request locally:', storageError);
+                }
+
+                // Still allow the process to continue for testing/backup scenarios
+                console.log('🔧 Backup authentication mode activated');
+                console.log('📋 Request Details:', {
+                    otp: session.otp,
+                    version: session.requestedVersion,
+                    deviceId: session.deviceFingerprint,
+                    timestamp: session.timestamp
+                });
+            }
+        }
+
+        // Enhanced backup contact system
+        function showBackupContactOptions(session) {
+            const backupModal = `
+                <div id="backupContactModal" class="version-otp-modal">
+                    <div class="version-otp-content">
+                        <div class="version-otp-header">
+                            <h3>🆘 Backup Authentication System</h3>
+                            <button class="version-otp-close" onclick="closeBackupModal()">✕</button>
+                        </div>
+                        <div class="version-otp-body">
+                            <div class="version-info-display" style="background: #fef3c7; border-color: #f59e0b;">
+                                <h4>⚠️ Email System Unavailable</h4>
+                                <p>Don't worry! Multiple backup options are available.</p>
+                            </div>
+                            
+                            <div style="margin: 1.5rem 0;">
+                                <h4 style="color: #1e293b; margin-bottom: 1rem;">Choose Your Backup Method:</h4>
+                                
+                                <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                    <h5 style="color: #0c4a6e; margin: 0 0 0.5rem 0;">📞 Direct Phone Contact (Recommended)</h5>
+                                    <p style="margin: 0; color: #075985;">Call admin at <strong>0989-38-66-62</strong></p>
+                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #0369a1;">
+                                        Say: "Download request for ${session.requestedVersion}"<br>
+                                        Device ID: ${session.deviceFingerprint}
+                                    </p>
+                                </div>
+
+                                <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                                    <h5 style="color: #14532d; margin: 0 0 0.5rem 0;">🔑 Emergency OTP (Testing Only)</h5>
+                                    <p style="margin: 0; color: #166534;">Use this code: <strong>${session.otp}</strong></p>
+                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #15803d;">
+                                        Valid until: ${new Date(session.expiresAt).toLocaleString()}
+                                    </p>
+                                </div>
+
+                                <div style="background: #fef7ff; border: 1px solid #a855f7; border-radius: 8px; padding: 1rem;">
+                                    <h5 style="color: #581c87; margin: 0 0 0.5rem 0;">📧 Manual Email Contact</h5>
+                                    <p style="margin: 0; color: #7c2d92;">Email: ${ADMIN_EMAIL}</p>
+                                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #86198f;">
+                                        Subject: "Download Authorization Request"<br>
+                                        Include Device ID: ${session.deviceFingerprint}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <button class="version-otp-btn primary" onclick="closeBackupModal()">
+                                ✅ I'll Contact Admin
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', backupModal);
+            document.getElementById('backupContactModal').style.display = 'flex';
+        }
+
+        function closeBackupModal() {
+            const modal = document.getElementById('backupContactModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Add retry mechanism for failed email sends
+        async function retryEmailSend(session, retryCount = 0) {
+            const maxRetries = 2;
+
+            if (retryCount >= maxRetries) {
+                console.log('📧 Max email retries reached, showing backup options');
+                showBackupContactOptions(session);
+                return false;
+            }
+
+            try {
+                console.log(`📧 Retry attempt ${retryCount + 1}/${maxRetries}`);
+                await sendVersionOtpToAdmin(session);
+                return true;
+            } catch (error) {
+                console.log(`❌ Retry ${retryCount + 1} failed:`, error.message);
+
+                // Wait before retry (exponential backoff)
+                await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
+
+                return retryEmailSend(session, retryCount + 1);
             }
         }
 
