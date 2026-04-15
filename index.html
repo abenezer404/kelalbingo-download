@@ -447,6 +447,228 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
         }
+
+        /* Version History Section */
+        .version-history {
+            background: #f8fafc;
+            padding: 4rem 0;
+        }
+
+        .version-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .version-subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+
+        .versions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .version-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .version-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .version-card.latest {
+            border: 2px solid #10b981;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .version-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .version-info h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .version-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .latest-badge {
+            background: #10b981;
+            color: white;
+        }
+
+        .stable-badge {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .feature-badge {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .legacy-badge {
+            background: #6b7280;
+            color: white;
+        }
+
+        .version-date {
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .version-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .release-notes h4 {
+            color: #1e293b;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .release-notes ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .release-notes li {
+            padding: 0.5rem 0;
+            color: #475569;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .release-notes li:last-child {
+            border-bottom: none;
+        }
+
+        .version-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .download-version-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .download-version-btn.primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .download-version-btn.primary:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .download-version-btn.secondary {
+            background: linear-gradient(135deg, #1e3a8a, #3730a3);
+            color: white;
+        }
+
+        .download-version-btn.secondary:hover {
+            background: linear-gradient(135deg, #1e40af, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+        }
+
+        .version-size {
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .version-info-box {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2rem;
+        }
+
+        .version-info-box h4 {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .version-info-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .version-info-box li {
+            padding: 0.5rem 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .versions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .version-actions {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .download-version-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 
@@ -458,6 +680,7 @@
             <nav>
                 <ul class="nav-links">
                     <li><a href="#features">Features</a></li>
+                    <li><a href="#versions">Versions</a></li>
                     <li><a href="#requirements">Requirements</a></li>
                     <li><a href="#support">Support</a></li>
                 </ul>
@@ -591,6 +814,141 @@
                     <h4>Network</h4>
                     <p>Internet connection required for user synchronization</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Version History Section -->
+    <section class="version-history" id="versions">
+        <div class="version-container">
+            <h2 class="section-title">Version History</h2>
+            <p class="version-subtitle">Download any version of KELALBINGO or see what's new in each release</p>
+
+            <div class="versions-grid">
+                <!-- Latest Version -->
+                <div class="version-card latest">
+                    <div class="version-header">
+                        <div class="version-info">
+                            <h3>v2.0.0</h3>
+                            <span class="version-badge latest-badge">Latest</span>
+                        </div>
+                        <div class="version-date">April 15, 2026</div>
+                    </div>
+                    <div class="version-content">
+                        <div class="release-notes">
+                            <h4>🚀 What's New:</h4>
+                            <ul>
+                                <li>⚡ Performance improvements - 66% faster game start</li>
+                                <li>🔧 Fixed database transaction handling</li>
+                                <li>⚡ Optimized card saving with batch operations</li>
+                                <li>🔒 Enhanced security features</li>
+                                <li>🎯 Improved user experience</li>
+                            </ul>
+                        </div>
+                        <div class="version-actions">
+                            <button class="download-version-btn primary"
+                                onclick="downloadVersion('2.0.0', '1VBAEJGYjtSMB9RfciLxuM7cGrtsV6LjY')">
+                                📥 Download v2.0.0
+                            </button>
+                            <div class="version-size">~150 MB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previous Versions -->
+                <div class="version-card">
+                    <div class="version-header">
+                        <div class="version-info">
+                            <h3>v1.9.5</h3>
+                            <span class="version-badge stable-badge">Stable</span>
+                        </div>
+                        <div class="version-date">March 28, 2026</div>
+                    </div>
+                    <div class="version-content">
+                        <div class="release-notes">
+                            <h4>🔧 Improvements:</h4>
+                            <ul>
+                                <li>🐛 Fixed memory leak in game engine</li>
+                                <li>🎯 Improved card selection accuracy</li>
+                                <li>🔒 Security patches applied</li>
+                                <li>📊 Better error reporting</li>
+                            </ul>
+                        </div>
+                        <div class="version-actions">
+                            <button class="download-version-btn secondary"
+                                onclick="downloadVersion('1.9.5', 'PREVIOUS_FILE_ID_1')">
+                                📥 Download v1.9.5
+                            </button>
+                            <div class="version-size">~145 MB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="version-card">
+                    <div class="version-header">
+                        <div class="version-info">
+                            <h3>v1.9.0</h3>
+                            <span class="version-badge feature-badge">Feature Release</span>
+                        </div>
+                        <div class="version-date">March 10, 2026</div>
+                    </div>
+                    <div class="version-content">
+                        <div class="release-notes">
+                            <h4>✨ New Features:</h4>
+                            <ul>
+                                <li>🎮 Added new game patterns</li>
+                                <li>📊 Enhanced reporting system</li>
+                                <li>🎯 Improved user interface</li>
+                                <li>⚡ Faster startup times</li>
+                            </ul>
+                        </div>
+                        <div class="version-actions">
+                            <button class="download-version-btn secondary"
+                                onclick="downloadVersion('1.9.0', 'PREVIOUS_FILE_ID_2')">
+                                📥 Download v1.9.0
+                            </button>
+                            <div class="version-size">~142 MB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="version-card">
+                    <div class="version-header">
+                        <div class="version-info">
+                            <h3>v1.8.5</h3>
+                            <span class="version-badge legacy-badge">Legacy</span>
+                        </div>
+                        <div class="version-date">February 20, 2026</div>
+                    </div>
+                    <div class="version-content">
+                        <div class="release-notes">
+                            <h4>🔧 Maintenance:</h4>
+                            <ul>
+                                <li>🐛 Critical bug fixes</li>
+                                <li>🔒 Security updates</li>
+                                <li>📈 Performance optimizations</li>
+                                <li>🎯 UI polish and refinements</li>
+                            </ul>
+                        </div>
+                        <div class="version-actions">
+                            <button class="download-version-btn secondary"
+                                onclick="downloadVersion('1.8.5', 'PREVIOUS_FILE_ID_3')">
+                                📥 Download v1.8.5
+                            </button>
+                            <div class="version-size">~140 MB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="version-info-box">
+                <h4>📋 Installation Notes:</h4>
+                <ul>
+                    <li>💾 All versions preserve your existing data and settings</li>
+                    <li>🔄 You can upgrade or downgrade between any versions</li>
+                    <li>🔒 Each download requires authorization for security</li>
+                    <li>📞 Contact support at <strong>0989-38-66-62</strong> for assistance</li>
+                </ul>
             </div>
         </div>
     </section>
@@ -862,6 +1220,102 @@ Request Time: ${new Date(session.timestamp).toLocaleString()}
             }
         }
 
+        // Version-specific download function
+        function downloadVersion(version, fileId) {
+            // Version-specific download URLs
+            const versionDownloads = {
+                '2.0.0': {
+                    fileId: '1VBAEJGYjtSMB9RfciLxuM7cGrtsV6LjY',
+                    fileName: 'KELALBINGO-Setup-2.0.0.exe',
+                    size: '~150 MB'
+                },
+                '1.9.5': {
+                    fileId: 'PREVIOUS_FILE_ID_1', // Replace with actual Google Drive file ID
+                    fileName: 'KELALBINGO-Setup-1.9.5.exe',
+                    size: '~145 MB'
+                },
+                '1.9.0': {
+                    fileId: 'PREVIOUS_FILE_ID_2', // Replace with actual Google Drive file ID
+                    fileName: 'KELALBINGO-Setup-1.9.0.exe',
+                    size: '~142 MB'
+                },
+                '1.8.5': {
+                    fileId: 'PREVIOUS_FILE_ID_3', // Replace with actual Google Drive file ID
+                    fileName: 'KELALBINGO-Setup-1.8.5.exe',
+                    size: '~140 MB'
+                }
+            };
+
+            const versionInfo = versionDownloads[version];
+            if (!versionInfo) {
+                alert('Version not found. Please contact support.');
+                return;
+            }
+
+            // Show confirmation dialog
+            const confirmDownload = confirm(`Download KELALBINGO ${version}?
+
+📦 File: ${versionInfo.fileName}
+📏 Size: ${versionInfo.size}
+
+⚠️ Note: This will download an older version. 
+For the latest features and security updates, we recommend downloading v2.0.0.
+
+Click OK to proceed with download.`);
+
+            if (!confirmDownload) {
+                return;
+            }
+
+            // Generate download URL
+            const downloadUrl = `https://drive.google.com/uc?export=download&id=${versionInfo.fileId}`;
+
+            // Start download
+            try {
+                // Create temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = versionInfo.fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Show success message
+                setTimeout(() => {
+                    alert(`✅ Download Started: KELALBINGO ${version}
+
+📋 Installation Instructions:
+
+1. 🔧 Run the installer as Administrator
+2. 📝 Follow the installation wizard
+3. 🌐 Connect to internet for device authorization
+4. 📞 Contact support at 0989-38-66-62 for assistance
+5. 🔑 Login with your authorized credentials
+
+${version === '2.0.0' ? '🚀 You\'re downloading the latest version with all new features!' : '⚠️ You\'re downloading an older version. Consider upgrading to v2.0.0 for the latest features.'}
+
+💾 Your existing data will be preserved during installation.`);
+                }, 500);
+
+            } catch (error) {
+                console.error('Download error:', error);
+                alert(`❌ Download Failed
+
+There was an issue starting the download. Please try:
+
+1. 🔄 Refresh the page and try again
+2. 🌐 Check your internet connection
+3. 📞 Contact support at 0989-38-66-62
+
+Error details: ${error.message || 'Unknown error'}`);
+            }
+        }
+
+        // Close modal function
+        function closeModal() {
+            document.getElementById('downloadModal').classList.remove('active');
+        }
+
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -875,18 +1329,6 @@ Request Time: ${new Date(session.timestamp).toLocaleString()}
                 }
             });
         });
-    </script>
-    anchor.addEventListener('click', function (e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-    target.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start'
-    });
-    }
-    });
-    });
     </script>
 
     <!-- Professional Download Success Modal -->

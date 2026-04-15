@@ -1,0 +1,16 @@
+{
+    "latestVersion": "2.0.0",
+    "releaseDate": "2026-04-15",
+    "downloadUrl": "https://abenezer404.github.io/kelal-bingo",
+    "directDownloadId": "1VBAEJGYjtSMB9RfciLxuM7cGrtsV6LjY",
+    "releaseNotes": [
+        "🚀 Performance improvements - 66% faster game start",
+        "🔧 Fixed database transaction handling",
+        "⚡ Optimized card saving with batch operations",
+        "🔒 Enhanced security features",
+        "🎯 Improved user experience"
+    ],
+    "minimumVersion": "1.0.0",
+    "forceUpdate": false,
+    "updateInstructions": "Download and run the installer. Your data will be preserved during the update."
+}

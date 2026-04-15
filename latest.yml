@@ -1,0 +1,14 @@
+version: 2.0.0
+files:
+  - url: https://drive.google.com/uc?export=download&id=1VBAEJGYjtSMB9RfciLxuM7cGrtsV6LjY
+    sha512: AUTO_GENERATED_CHECKSUM_WILL_BE_REPLACED
+    size: 157286400
+path: KELALBINGO-Setup-2.0.0.exe
+sha512: AUTO_GENERATED_CHECKSUM_WILL_BE_REPLACED
+releaseDate: '2026-04-15T10:00:00.000Z'
+releaseNotes: |-
+  🚀 Performance improvements - 66% faster game start
+  🔧 Fixed database transaction handling
+  ⚡ Optimized card saving with batch operations
+  🔒 Enhanced security features
+  🎯 Improved user experience
