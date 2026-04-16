@@ -1,8 +1,8 @@
 {
     "latestVersion": "2.2.0",
     "releaseDate": "2026-04-16",
-    "downloadUrl": "https://abenezer404.github.io/kelalbingo-download",
-    "directDownloadId": "131JGm6oxn4zoSDjF7Tfj4YgCVWOjPv47",
+    "downloadUrl": "https://github.com/abenezer404/kelalbingo-download/releases",
+    "directDownloadId": "1YOUin0hoiEay-0u41FxiwXZgXPfeSQJJ",
     "releaseNotes": [
         "🎨 Modern Update UI - No more ugly modals! Status shows directly on button",
         "🔧 Enhanced Network Error Handling - Better sync reliability with retry options",
