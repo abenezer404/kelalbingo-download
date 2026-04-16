@@ -1057,7 +1057,7 @@
                     }
                 }
             } catch (error) {
-                console.warn('Could not load security state:', error);
+                // Silent fail for security
             }
         }
 
@@ -1070,7 +1070,7 @@
                 };
                 localStorage.setItem('kelalbingo_security_state', JSON.stringify(stateToSave));
             } catch (error) {
-                console.warn('Could not save security state:', error);
+                // Silent fail for security
             }
         }
 
@@ -1266,8 +1266,6 @@
                 details: details
             };
 
-            console.log('🔒 Security Event:', securityLog);
-
             // Store security events locally for admin review
             try {
                 const existingLogs = JSON.parse(localStorage.getItem('kelalbingo_security_logs') || '[]');
@@ -1280,7 +1278,7 @@
 
                 localStorage.setItem('kelalbingo_security_logs', JSON.stringify(existingLogs));
             } catch (error) {
-                console.warn('Could not store security log:', error);
+                // Silent fail for security
             }
         }
 
@@ -1494,16 +1492,12 @@
                 recommendations: []
             };
 
-            console.log('🔍 Device Information Validation Report');
-            console.log('=====================================');
-
             // 1. Validate OS Detection Accuracy
             const osValidation = validateOSDetection(deviceInfo);
             if (!osValidation.accurate) {
                 validationResults.issues.push(`OS Detection: ${osValidation.issue}`);
                 validationResults.overall = 'FAIL';
             }
-            console.log(`✅ OS Detection: ${deviceInfo.detailedOS.name} ${deviceInfo.detailedOS.version} (${deviceInfo.detailedOS.architecture})`);
 
             // 2. Validate Browser Detection Accuracy
             const browserValidation = validateBrowserDetection(deviceInfo);
@@ -1511,54 +1505,30 @@
                 validationResults.issues.push(`Browser Detection: ${browserValidation.issue}`);
                 validationResults.overall = 'FAIL';
             }
-            console.log(`✅ Browser Detection: ${deviceInfo.realBrowser.name} ${deviceInfo.realBrowser.version} (${deviceInfo.realBrowser.engine})`);
 
             // 3. Validate Hardware Information
             const hardwareValidation = validateHardwareInfo(deviceInfo);
             if (hardwareValidation.warnings.length > 0) {
                 validationResults.warnings.push(...hardwareValidation.warnings);
             }
-            console.log(`✅ Hardware Info: ${deviceInfo.hardwareConcurrency} cores, ${deviceInfo.deviceMemory || 'Unknown'} GB RAM`);
 
             // 4. Validate Screen Information
             const screenValidation = validateScreenInfo(deviceInfo);
-            console.log(`✅ Screen Info: ${deviceInfo.screenResolution}, ${deviceInfo.screenColorDepth}-bit color`);
 
             // 5. Validate WebGL Capabilities
             const webglValidation = validateWebGLInfo(deviceInfo);
-            if (deviceInfo.webGL.supported) {
-                console.log(`✅ WebGL: ${deviceInfo.webGL.vendor} - ${deviceInfo.webGL.renderer}`);
-            } else {
-                console.log(`⚠️ WebGL: Not supported or blocked`);
+            if (!deviceInfo.webGL.supported) {
                 validationResults.warnings.push('WebGL not available - reduced fingerprint accuracy');
             }
 
-            // 6. Validate Timezone and Language
-            console.log(`✅ Locale: ${deviceInfo.timezone}, Language: ${deviceInfo.language}`);
-
-            // 7. Check for potential spoofing
+            // 6. Check for potential spoofing
             const spoofingCheck = detectPotentialSpoofing(deviceInfo);
             if (spoofingCheck.suspicious) {
                 validationResults.warnings.push(`Potential spoofing detected: ${spoofingCheck.reason}`);
             }
 
-            // 8. Validate fingerprint uniqueness
+            // 7. Validate fingerprint uniqueness
             const fingerprintValidation = validateFingerprintUniqueness(deviceInfo);
-            console.log(`✅ Fingerprint: ${deviceInfo.fingerprint} (${fingerprintValidation.uniqueness})`);
-
-            // Generate final report
-            console.log('=====================================');
-            console.log(`🎯 Overall Validation: ${validationResults.overall}`);
-
-            if (validationResults.issues.length > 0) {
-                console.log('❌ Critical Issues:');
-                validationResults.issues.forEach(issue => console.log(`   - ${issue}`));
-            }
-
-            if (validationResults.warnings.length > 0) {
-                console.log('⚠️ Warnings:');
-                validationResults.warnings.forEach(warning => console.log(`   - ${warning}`));
-            }
 
             // Store validation results
             localStorage.setItem('kelalbingo_device_validation', JSON.stringify({
@@ -1781,20 +1751,6 @@
                 issues: validationResults.issues.length,
                 warnings: validationResults.warnings.length
             });
-
-            // Show validation summary in console for debugging
-            console.log('🔧 Device Information System Ready');
-            console.log(`📊 Validation Status: ${validationResults.overall}`);
-            console.log(`🆔 Device Fingerprint: ${currentDeviceInfo.fingerprint}`);
-            console.log(`💻 Detected System: ${currentDeviceInfo.detailedOS.name} ${currentDeviceInfo.detailedOS.version}`);
-            console.log(`🌐 Detected Browser: ${currentDeviceInfo.realBrowser.name} ${currentDeviceInfo.realBrowser.version}`);
-
-            // Make validation function available globally for debugging
-            window.validateDeviceInfoAccuracy = validateDeviceInfoAccuracy;
-            window.currentDeviceInfo = currentDeviceInfo;
-
-            console.log('🔍 Debug: Type "validateDeviceInfoAccuracy()" in console to run validation again');
-            console.log('🔍 Debug: Type "currentDeviceInfo" in console to see all detected information');
         });
 
         // Version-specific download function with OTP authentication
@@ -1942,7 +1898,6 @@
                     saveSecurityState();
 
                     alert(`🔒 Security Check Failed\n\n${error.message}`);
-                    console.error('Security validation error:', error);
                 } finally {
                     btn.innerHTML = originalText;
                     btn.disabled = false;
@@ -2043,11 +1998,8 @@
                     templateParams
                 );
 
-                console.log('✅ OTP email sent successfully');
-
             } catch (error) {
                 // Enhanced backup system for email failures
-                console.error('❌ Email sending failed:', error);
 
                 // Parse error details
                 let errorMessage = 'Unknown error';
@@ -2126,20 +2078,12 @@ ${backupSolution}
 
                     // Store in localStorage as backup
                     localStorage.setItem('kelalbingo_backup_request', JSON.stringify(backupData));
-                    console.log('📦 Backup request stored locally for admin review');
 
                 } catch (storageError) {
-                    console.warn('⚠️ Could not store backup request locally:', storageError);
+                    // Silent fail for security
                 }
 
                 // Still allow the process to continue for testing/backup scenarios
-                console.log('🔧 Backup authentication mode activated');
-                console.log('📋 Request Details:', {
-                    otp: session.otp,
-                    version: session.requestedVersion,
-                    deviceId: session.deviceFingerprint,
-                    timestamp: session.timestamp
-                });
             }
         }
 
@@ -2216,18 +2160,14 @@ ${backupSolution}
             const maxRetries = 2;
 
             if (retryCount >= maxRetries) {
-                console.log('📧 Max email retries reached, showing backup options');
                 showBackupContactOptions(session);
                 return false;
             }
 
             try {
-                console.log(`📧 Retry attempt ${retryCount + 1}/${maxRetries}`);
                 await sendVersionOtpToAdmin(session);
                 return true;
             } catch (error) {
-                console.log(`❌ Retry ${retryCount + 1} failed:`, error.message);
-
                 // Wait before retry (exponential backoff)
                 await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
 
